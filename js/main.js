@@ -95,3 +95,42 @@ function showToast(message) {
     toast.classList.remove('toast--visible');
   }, 2500);
 }
+
+
+// ===============================
+// 5. Переключатель темы (выбор сохраняется в localStorage)
+// ===============================
+const THEME_STORAGE_KEY = 'devicehub-theme';
+const themeToggle = document.querySelector('.theme-toggle');
+const systemDarkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+function getCurrentTheme() {
+  const selectedTheme = document.documentElement.dataset.theme;
+
+  if (selectedTheme) {
+    return selectedTheme;
+  }
+
+  return systemDarkQuery.matches ? 'dark' : 'light';
+}
+
+function updateThemeToggle() {
+  if (themeToggle) {
+    themeToggle.setAttribute('aria-pressed', String(getCurrentTheme() === 'dark'));
+  }
+}
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.dataset.theme = nextTheme;
+    saveToStorage(THEME_STORAGE_KEY, nextTheme);
+    updateThemeToggle();
+    showToast(nextTheme === 'dark' ? 'Включена тёмная тема' : 'Включена светлая тема');
+  });
+
+  // Пока пользователь не выбрал тему сам, следуем за настройкой системы
+  systemDarkQuery.addEventListener('change', updateThemeToggle);
+  updateThemeToggle();
+}

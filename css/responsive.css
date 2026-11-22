@@ -377,10 +377,10 @@
 }
 
 /* ===============================
-   Доработка: тёмная тема по настройке системы
+   Доработка: тёмная тема по настройке системы или по кнопке в шапке
    =============================== */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --color-bg: #1a1412;
     --color-text: #f2ece7;
@@ -399,9 +399,37 @@
     --color-focus: #f0d4c0;
   }
 
-  .order-dialog::backdrop {
+  :root:not([data-theme="light"]) .order-dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.75);
   }
+}
+
+/* Тема, выбранная кнопкой в шапке (сохраняется в localStorage) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #1a1412;
+  --color-text: #f2ece7;
+  --color-muted: #b8aca3;
+  --color-primary: #d9b49b;
+  --color-primary-dark: #f0d4c0;
+  --color-on-primary: #1a1412;
+  --color-border: #5a4d45;
+  --color-border-strong: #8f8178;
+  --color-surface: #231b18;
+  --color-surface-accent: #2e2420;
+  --color-media-bg: #ffffff;
+  --color-danger: #ff8a8a;
+  --color-success: #6fd38a;
+  --color-success-bg: #17301e;
+  --color-focus: #f0d4c0;
+}
+
+:root[data-theme="dark"] .order-dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 /* ===============================
