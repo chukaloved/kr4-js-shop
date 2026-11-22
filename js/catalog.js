@@ -57,6 +57,11 @@ function sortProducts(products, sortType) {
 
 function getPreparedProducts(products, state) {
   let result = searchProducts(products, state.query);
+
+  if (state.onlyAvailable) {
+    result = getAvailableProducts(result);
+  }
+
   result = filterProductsByCategory(result, state.category);
   result = sortProducts(result, state.sort);
   return result;
@@ -220,18 +225,65 @@ if (popularContainer) {
 // ===============================
 // 4. Состояние каталога: поиск, фильтр, сортировка
 // ===============================
-const catalogState = {
+const defaultCatalogState = {
   query: '',
   category: 'all',
-  sort: 'default'
+  sort: 'default',
+  onlyAvailable: false
 };
+
+// Копия объекта: при сбросе фильтров возвращаемся к значениям по умолчанию
+const catalogState = { ...defaultCatalogState };
 
 const catalogControls = document.querySelector('#catalog-controls');
 const searchInput = document.querySelector('#catalog-search');
 const categoryFilter = document.querySelector('#category-filter');
 const sortSelect = document.querySelector('#sort-select');
+const availableFilter = document.querySelector('#available-filter');
+const emptyHint = document.querySelector('[data-empty-hint]');
+const emptySuggestions = document.querySelector('[data-empty-suggestions]');
 const catalogCount = document.querySelector('.catalog-count');
 const catalogEmpty = document.querySelector('.catalog-empty');
+
+function isCatalogFiltered() {
+  return Object.keys(defaultCatalogState).some((key) => catalogState[key] !== defaultCatalogState[key]);
+}
+
+// Пояснение в пустом состоянии: что именно мешает найти товары
+function getEmptyHint() {
+  const reasons = [];
+
+  if (catalogState.query.trim() !== '') {
+    reasons.push(`запрос «${catalogState.query.trim()}»`);
+  }
+
+  if (catalogState.category !== 'all') {
+    reasons.push(`категория «${getCategoryName(catalogState.category)}»`);
+  }
+
+  if (catalogState.onlyAvailable) {
+    reasons.push('только товары в наличии');
+  }
+
+  return reasons.length > 0 ? `Условия поиска: ${reasons.join(', ')}. Попробуйте изменить их или поищите:` : '';
+}
+
+// Подсказки — бренды самых высоко оценённых товаров
+function renderEmptySuggestions() {
+  const brands = sortProducts(products, 'rating-desc').map((product) => product.title.split(' ')[1]);
+  const uniqueBrands = [...new Set(brands)].slice(0, 4);
+
+  emptySuggestions.textContent = '';
+  uniqueBrands.forEach((brand) => {
+    const item = createElement('li');
+    const button = createElement('button', 'catalog-empty__suggestion', brand);
+    button.type = 'button';
+    button.dataset.action = 'suggest';
+    button.dataset.query = brand;
+    item.append(button);
+    emptySuggestions.append(item);
+  });
+}
 
 function updateCatalog() {
   const preparedProducts = getPreparedProducts(products, catalogState);
@@ -244,7 +296,27 @@ function updateCatalog() {
 
   if (catalogEmpty) {
     catalogEmpty.hidden = preparedProducts.length > 0;
+    emptyHint.textContent = getEmptyHint();
   }
+
+  document.querySelectorAll('[data-action="reset-filters"]').forEach((button) => {
+    button.disabled = !isCatalogFiltered();
+  });
+}
+
+// Переносим состояние обратно в элементы управления (после сброса или подсказки)
+function syncCatalogControls() {
+  searchInput.value = catalogState.query;
+  categoryFilter.value = catalogState.category;
+  sortSelect.value = catalogState.sort;
+  availableFilter.checked = catalogState.onlyAvailable;
+}
+
+function resetCatalog() {
+  Object.assign(catalogState, defaultCatalogState);
+  syncCatalogControls();
+  updateCatalog();
+  showToast('Фильтры сброшены');
 }
 
 if (productsContainer) {
@@ -274,6 +346,35 @@ if (productsContainer) {
       catalogState.sort = event.target.value;
       updateCatalog();
     });
+  }
+
+  if (availableFilter) {
+    availableFilter.addEventListener('change', (event) => {
+      catalogState.onlyAvailable = event.target.checked;
+      updateCatalog();
+    });
+  }
+
+  // Кнопки «Сбросить фильтры» и подсказки в пустом состоянии
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-action="reset-filters"], [data-action="suggest"]');
+
+    if (!button) {
+      return;
+    }
+
+    if (button.dataset.action === 'reset-filters') {
+      resetCatalog();
+      return;
+    }
+
+    Object.assign(catalogState, defaultCatalogState, { query: button.dataset.query });
+    syncCatalogControls();
+    updateCatalog();
+  });
+
+  if (emptySuggestions) {
+    renderEmptySuggestions();
   }
 
   updateCatalog();

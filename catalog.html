@@ -141,6 +141,13 @@
                 <option value="rating-desc">По рейтингу</option>
               </select>
             </div>
+
+            <label class="catalog-controls__check" for="available-filter">
+              <input id="available-filter" name="available" type="checkbox">
+              <span>Только в наличии</span>
+            </label>
+
+            <button class="button button--secondary catalog-controls__reset" type="button" data-action="reset-filters">Сбросить фильтры</button>
           </form>
         </div>
       </details>
@@ -150,6 +157,9 @@
         <p class="catalog-count" aria-live="polite"></p>
         <div class="catalog-empty" hidden>
           <p class="catalog-empty__text">По выбранным условиям товары не найдены.</p>
+          <p class="catalog-empty__hint" data-empty-hint></p>
+          <ul class="catalog-empty__suggestions" data-empty-suggestions aria-label="Популярные запросы"></ul>
+          <button class="button button--primary" type="button" data-action="reset-filters">Сбросить фильтры</button>
         </div>
         <ul class="products-grid" data-products-container></ul>
         <noscript>
