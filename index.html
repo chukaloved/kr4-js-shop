@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="DeviceHub — интернет-магазин компьютерной периферии: игровые мыши и микрофоны с доставкой по Москве.">
+  <meta name="description" content="DeviceHub — интернет-магазин компьютерной периферии: мыши, клавиатуры, наушники и микрофоны с доставкой по Москве.">
   <meta name="color-scheme" content="light dark">
   <title>DeviceHub — компьютерная периферия</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/responsive.css">
   <script>document.documentElement.classList.add('js');</script>
   <script src="js/data.js" defer></script>
+  <script src="js/utils.js" defer></script>
+  <script src="js/catalog.js" defer></script>
+  <script src="js/validation.js" defer></script>
+  <script src="js/modal.js" defer></script>
   <script src="js/main.js" defer></script>
 </head>
 
@@ -82,12 +86,6 @@
       </div>
     </section>
 
-    <section class="section js-check" aria-labelledby="js-check-title">
-      <h2 id="js-check-title">Проверка JavaScript: статистика каталога</h2>
-      <p class="js-message">JavaScript пока не выполнился.</p>
-      <pre class="product-output"></pre>
-    </section>
-
     <section class="section" id="advantages" aria-labelledby="advantages-title">
       <h2 id="advantages-title">Преимущества DeviceHub</h2>
       <ul class="advantages">
@@ -105,99 +103,17 @@
         </li>
         <li class="advantages__item">
           <h3 class="advantages__title">Помощь с выбором</h3>
-          <p class="advantages__text">Подскажем, какая мышь или микрофон подойдут под ваши задачи.</p>
+          <p class="advantages__text">Подскажем, какая мышь, клавиатура или гарнитура подойдут под ваши задачи.</p>
         </li>
       </ul>
     </section>
 
     <section class="section" id="popular" aria-labelledby="popular-title">
       <h2 id="popular-title">Популярные товары</h2>
-      <ul class="products-grid">
-          <li class="products-grid__item">
-            <article class="product-card product-card--featured" aria-labelledby="card-order-logitech-g-pro-x">
-              <img
-                class="product-card__image"
-                src="images/logitech-g-pro-x-640.webp"
-                srcset="images/logitech-g-pro-x-480.webp 480w, images/logitech-g-pro-x-640.webp 640w, images/logitech-g-pro-x-960.webp 960w"
-                sizes="(min-width: 1100px) 340px, (min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
-                width="640"
-                height="640"
-                alt="Игровая мышь Logitech G Pro X чёрного цвета, вид сверху"
-                loading="lazy"
-                decoding="async"
-              >
-              <h3 class="product-card__title" id="card-order-logitech-g-pro-x">Мышь компьютерная Logitech G Pro X</h3>
-              <p class="product-card__description">Эргономичная игровая мышь с точным сенсором и удобным управлением.</p>
-              <div class="product-card__footer">
-                <p class="product-card__price">12&nbsp;899&nbsp;₽</p>
-                <button
-                class="button button--primary product-card__button"
-                type="button"
-                data-product="Logitech G Pro X"
-                aria-label="Заказать Logitech G Pro X"
-              >
-                Заказать
-              </button>
-              </div>
-            </article>
-          </li>
-          <li class="products-grid__item">
-            <article class="product-card" aria-labelledby="card-order-fifine-am8">
-              <img
-                class="product-card__image"
-                src="images/fifine-am8-640.webp"
-                srcset="images/fifine-am8-480.webp 480w, images/fifine-am8-640.webp 640w, images/fifine-am8-960.webp 960w"
-                sizes="(min-width: 1100px) 340px, (min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
-                width="640"
-                height="1129"
-                alt="Динамический микрофон Fifine AM8 на подставке"
-                loading="lazy"
-                decoding="async"
-              >
-              <h3 class="product-card__title" id="card-order-fifine-am8">Микрофон Fifine AM8</h3>
-              <p class="product-card__description">Универсальный USB/XLR-микрофон с чистым звучанием для общения, стримов и записи.</p>
-              <div class="product-card__footer">
-                <p class="product-card__price">4&nbsp;799&nbsp;₽</p>
-                <button
-                class="button button--primary product-card__button"
-                type="button"
-                data-product="Fifine AM8"
-                aria-label="Заказать Fifine AM8"
-              >
-                Заказать
-              </button>
-              </div>
-            </article>
-          </li>
-          <li class="products-grid__item">
-            <article class="product-card" aria-labelledby="card-order-fifine-am8t">
-              <img
-                class="product-card__image"
-                src="images/fifine-am8t-640.webp"
-                srcset="images/fifine-am8t-480.webp 480w, images/fifine-am8t-640.webp 640w, images/fifine-am8t-960.webp 960w"
-                sizes="(min-width: 1100px) 340px, (min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
-                width="640"
-                height="640"
-                alt="Микрофон Fifine AM8T на регулируемой настольной стойке"
-                loading="lazy"
-                decoding="async"
-              >
-              <h3 class="product-card__title" id="card-order-fifine-am8t">Микрофон Fifine AM8T</h3>
-              <p class="product-card__description">Настольный микрофон на стойке с удобной регулировкой положения и качественным звучанием.</p>
-              <div class="product-card__footer">
-                <p class="product-card__price">5&nbsp;499&nbsp;₽</p>
-                <button
-                class="button button--primary product-card__button"
-                type="button"
-                data-product="Fifine AM8T"
-                aria-label="Заказать Fifine AM8T"
-              >
-                Заказать
-              </button>
-              </div>
-            </article>
-          </li>
-      </ul>
+      <ul class="products-grid" data-popular-container></ul>
+      <noscript>
+        <p>Для вывода товаров включите JavaScript. Все товары есть в <a href="catalog.html">каталоге</a>.</p>
+      </noscript>
     </section>
 
     <p class="success-message" id="success-message" role="status" hidden>

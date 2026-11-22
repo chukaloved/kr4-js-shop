@@ -552,6 +552,33 @@ summary:focus-visible,
   margin-top: auto;
 }
 
+.product-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-card__link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.product-card__meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.product-card__status {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.product-card__status--out {
+  color: var(--color-danger);
+}
+
 /* ===============================
    10. Каталог
    =============================== */
@@ -632,44 +659,59 @@ summary:focus-visible,
   font-weight: 700;
 }
 
-.filters-form__option {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  min-height: var(--tap-size);
+.catalog-controls__group {
+  min-width: 0;
 }
 
-.filters-form__option input {
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  accent-color: var(--color-primary);
-}
-
-.filters-form__price {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-sm);
-}
-
-.filters-form__price label {
+.catalog-controls__label {
   display: block;
   margin-bottom: var(--space-xs);
+  font-weight: 700;
 }
 
-.filters-form input[type="number"] {
+.catalog-controls__input,
+.catalog-controls__select {
   width: 100%;
   min-height: var(--tap-size);
   padding: 8px 10px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   font: inherit;
+  font-size: 16px;
   color: var(--color-text);
   background-color: var(--color-bg);
 }
 
-.filters-form .button {
-  width: 100%;
+.catalog-controls__input:hover,
+.catalog-controls__select:hover {
+  border-color: var(--color-primary);
+}
+
+.catalog-summary {
+  margin: var(--space-sm) 0 0;
+  font-weight: 700;
+}
+
+.catalog-count {
+  margin: 0 0 var(--space-md);
+  color: var(--color-muted);
+}
+
+.catalog-empty {
+  padding: var(--space-lg);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  text-align: center;
+  background-color: var(--color-surface);
+}
+
+.catalog-empty[hidden] {
+  display: none;
+}
+
+.catalog-empty__text {
+  margin: 0;
+  font-weight: 700;
 }
 
 /* ===============================
@@ -909,6 +951,31 @@ summary:focus-visible,
 
 [aria-invalid="true"] {
   border-color: var(--color-danger);
+  box-shadow: 0 0 0 1px var(--color-danger);
+}
+
+.form-error {
+  margin: var(--space-xs) 0 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.form-error:empty {
+  display: none;
+}
+
+.form-message {
+  margin: 0 0 var(--space-md);
+  font-weight: 700;
+}
+
+.form-message:empty {
+  display: none;
+}
+
+.form-message--error {
+  color: var(--color-danger);
 }
 
 /* ===============================
@@ -1048,22 +1115,4 @@ summary:focus-visible,
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-size);
-}
-
-/* ===============================
-   17. Учебный блок проверки JavaScript
-   =============================== */
-.js-message {
-  margin: 0 0 var(--space-md);
-  font-weight: 700;
-}
-
-.product-output {
-  margin: 0;
-  padding: var(--space-md);
-  overflow-x: auto;
-  white-space: pre-wrap;
-  color: #f9fafb;
-  background-color: #111827;
-  border-radius: var(--radius-md);
 }
