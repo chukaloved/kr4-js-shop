@@ -66,6 +66,60 @@ function getAvailableProducts(products) {
 console.log('Названия товаров:', getProductTitles(products));
 console.log('Товары в наличии:', getAvailableProducts(products));
 
+function searchProducts(products, query) {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (normalizedQuery === '') {
+    return products;
+  }
+
+  return products.filter((product) => {
+    return product.title.toLowerCase().includes(normalizedQuery);
+  });
+}
+
+function filterProductsByCategory(products, category) {
+  if (category === 'all') {
+    return products;
+  }
+
+  return products.filter((product) => product.category === category);
+}
+
+// sort() меняет массив, поэтому сортируем копию, а исходный порядок сохраняется
+function sortProductsByPrice(products, direction = 'asc') {
+  const productsCopy = [...products];
+
+  if (direction === 'desc') {
+    return productsCopy.sort((a, b) => b.price - a.price);
+  }
+
+  return productsCopy.sort((a, b) => a.price - b.price);
+}
+
+function findProductById(products, id) {
+  return products.find((product) => product.id === id);
+}
+
+function getPreparedProducts(products, query, category, sortDirection) {
+  let result = searchProducts(products, query);
+  result = filterProductsByCategory(result, category);
+  result = sortProductsByPrice(result, sortDirection);
+  return result;
+}
+
+console.log('Поиск «logitech»:', getProductTitles(searchProducts(products, 'logitech')));
+console.log('Категория «Клавиатуры»:', getProductTitles(filterProductsByCategory(products, 'keyboard')));
+console.log('Сначала дешевле:', getProductTitles(sortProductsByPrice(products, 'asc')));
+console.log('Сначала дороже:', getProductTitles(sortProductsByPrice(products, 'desc')));
+console.log('Товар с id 9:', findProductById(products, 9));
+console.log('Товар с id 99:', findProductById(products, 99));
+console.log('Первый товар после сортировки не изменил исходный массив:', products[0].title);
+console.log(
+  'Микрофоны со словом «fifine» по убыванию цены:',
+  getProductTitles(getPreparedProducts(products, 'fifine', 'microphone', 'desc'))
+);
+
 const messageElement = document.querySelector('.js-message');
 const productOutputElement = document.querySelector('.product-output');
 
