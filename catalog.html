@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Каталог DeviceHub: игровые мыши и микрофоны с фильтром по категории и цене.">
+  <meta name="description" content="Каталог DeviceHub: мыши, клавиатуры, наушники и микрофоны с поиском, фильтром и сортировкой.">
   <meta name="color-scheme" content="light dark">
   <title>Каталог товаров — DeviceHub</title>
   <link rel="stylesheet" href="css/style.css">
@@ -73,127 +73,62 @@
 
     <section class="section">
       <h1>Каталог товаров</h1>
-      <p class="section__lead">Игровые мыши и микрофоны для стримов, записи и работы. Используйте фильтр, чтобы подобрать товар по категории и цене.</p>
+      <p class="section__lead">Мыши, клавиатуры, наушники и микрофоны для игр, стримов и работы. Найдите товар по названию, выберите категорию и порядок сортировки.</p>
     </section>
 
     <div class="catalog-layout">
       <details class="catalog-filters" id="catalog-filters" open>
-        <summary class="catalog-filters__summary">Фильтры</summary>
+        <summary class="catalog-filters__summary">Поиск и фильтры</summary>
 
         <div class="catalog-filters__body">
-          <form class="filters-form" action="#" method="get" aria-label="Фильтр товаров">
-            <fieldset>
-              <legend>Категория</legend>
-              <label class="filters-form__option"><input type="checkbox" name="category" value="all"> Все товары</label>
-              <label class="filters-form__option"><input type="checkbox" name="category" value="mouse"> Мыши</label>
-              <label class="filters-form__option"><input type="checkbox" name="category" value="microphone"> Микрофоны</label>
-              <label class="filters-form__option"><input type="checkbox" name="category" value="popular"> Популярные</label>
-            </fieldset>
+          <form class="filters-form catalog-controls" id="catalog-controls" action="#" role="search" aria-label="Поиск и фильтр товаров">
+            <div class="catalog-controls__group">
+              <label class="catalog-controls__label" for="catalog-search">Поиск товара</label>
+              <input
+                class="catalog-controls__input"
+                id="catalog-search"
+                name="query"
+                type="search"
+                placeholder="Например, Logitech"
+                autocomplete="off"
+              >
+            </div>
 
-            <fieldset>
-              <legend>Цена, ₽</legend>
-              <div class="filters-form__price">
-                <div>
-                  <label for="price-from">От</label>
-                  <input id="price-from" name="price-from" type="number" min="0" step="100" inputmode="numeric" placeholder="0">
-                </div>
-                <div>
-                  <label for="price-to">До</label>
-                  <input id="price-to" name="price-to" type="number" min="0" step="100" inputmode="numeric" placeholder="15000">
-                </div>
-              </div>
-            </fieldset>
+            <div class="catalog-controls__group">
+              <label class="catalog-controls__label" for="category-filter">Категория</label>
+              <select class="catalog-controls__select" id="category-filter" name="category">
+                <option value="all">Все категории</option>
+                <option value="mouse">Мыши</option>
+                <option value="keyboard">Клавиатуры</option>
+                <option value="headphones">Наушники</option>
+                <option value="microphone">Микрофоны</option>
+              </select>
+            </div>
 
-            <button class="button button--primary" type="submit">Применить</button>
+            <div class="catalog-controls__group">
+              <label class="catalog-controls__label" for="sort-select">Сортировка</label>
+              <select class="catalog-controls__select" id="sort-select" name="sort">
+                <option value="default">По умолчанию</option>
+                <option value="price-asc">Сначала дешевле</option>
+                <option value="price-desc">Сначала дороже</option>
+                <option value="title-asc">По названию А–Я</option>
+                <option value="rating-desc">По рейтингу</option>
+              </select>
+            </div>
           </form>
         </div>
       </details>
 
       <section class="catalog-products" aria-labelledby="catalog-list-title">
         <h2 id="catalog-list-title">Список товаров</h2>
-        <ul class="products-grid">
-          <li class="products-grid__item">
-            <article class="product-card product-card--featured" aria-labelledby="card-catalog-logitech-g-pro-x">
-              <img
-                class="product-card__image"
-                src="images/logitech-g-pro-x-640.webp"
-                srcset="images/logitech-g-pro-x-480.webp 480w, images/logitech-g-pro-x-640.webp 640w, images/logitech-g-pro-x-960.webp 960w"
-                sizes="(min-width: 1280px) 260px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 100vw"
-                width="640"
-                height="640"
-                alt="Игровая мышь Logitech G Pro X чёрного цвета, вид сверху"
-                loading="lazy"
-                decoding="async"
-              >
-              <h3 class="product-card__title" id="card-catalog-logitech-g-pro-x">Мышь компьютерная Logitech G Pro X</h3>
-              <p class="product-card__description">Эргономичная игровая мышь с точным сенсором и удобным управлением.</p>
-              <div class="product-card__footer">
-                <p class="product-card__price">12&nbsp;899&nbsp;₽</p>
-                <a
-                class="button button--primary product-card__button"
-                href="product.html#logitech-g-pro-x"
-                aria-label="Подробнее о Logitech G Pro X"
-              >
-                Подробнее
-              </a>
-              </div>
-            </article>
-          </li>
-          <li class="products-grid__item">
-            <article class="product-card" aria-labelledby="card-catalog-fifine-am8">
-              <img
-                class="product-card__image"
-                src="images/fifine-am8-640.webp"
-                srcset="images/fifine-am8-480.webp 480w, images/fifine-am8-640.webp 640w, images/fifine-am8-960.webp 960w"
-                sizes="(min-width: 1280px) 260px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 100vw"
-                width="640"
-                height="1129"
-                alt="Динамический микрофон Fifine AM8 на подставке"
-                loading="lazy"
-                decoding="async"
-              >
-              <h3 class="product-card__title" id="card-catalog-fifine-am8">Микрофон Fifine AM8</h3>
-              <p class="product-card__description">Универсальный USB/XLR-микрофон с чистым звучанием для общения, стримов и записи.</p>
-              <div class="product-card__footer">
-                <p class="product-card__price">4&nbsp;799&nbsp;₽</p>
-                <a
-                class="button button--primary product-card__button"
-                href="product.html#fifine-am8"
-                aria-label="Подробнее о Fifine AM8"
-              >
-                Подробнее
-              </a>
-              </div>
-            </article>
-          </li>
-          <li class="products-grid__item">
-            <article class="product-card" aria-labelledby="card-catalog-fifine-am8t">
-              <img
-                class="product-card__image"
-                src="images/fifine-am8t-640.webp"
-                srcset="images/fifine-am8t-480.webp 480w, images/fifine-am8t-640.webp 640w, images/fifine-am8t-960.webp 960w"
-                sizes="(min-width: 1280px) 260px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 100vw"
-                width="640"
-                height="640"
-                alt="Микрофон Fifine AM8T на регулируемой настольной стойке"
-                loading="lazy"
-                decoding="async"
-              >
-              <h3 class="product-card__title" id="card-catalog-fifine-am8t">Микрофон Fifine AM8T</h3>
-              <p class="product-card__description">Настольный микрофон на стойке с удобной регулировкой положения и качественным звучанием.</p>
-              <div class="product-card__footer">
-                <p class="product-card__price">5&nbsp;499&nbsp;₽</p>
-                <a
-                class="button button--primary product-card__button"
-                href="product.html#fifine-am8t"
-                aria-label="Подробнее о Fifine AM8T"
-              >
-                Подробнее
-              </a>
-              </div>
-            </article>
-          </li>
-        </ul>
+        <p class="catalog-count" aria-live="polite"></p>
+        <div class="catalog-empty" hidden>
+          <p class="catalog-empty__text">По выбранным условиям товары не найдены.</p>
+        </div>
+        <ul class="products-grid" data-products-container></ul>
+        <noscript>
+          <p class="catalog-empty__text">Для работы каталога включите JavaScript в браузере.</p>
+        </noscript>
       </section>
     </div>
   </main>
