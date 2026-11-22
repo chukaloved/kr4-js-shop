@@ -245,3 +245,27 @@ if (catalogSummary) {
     `В каталоге ${products.length} товаров, в наличии ${countAvailableProducts(products)}. ` +
     `Средняя цена — ${formatPrice(calculateAveragePrice(products))}.`;
 }
+
+
+// ===============================
+// 6. Делегирование событий: один обработчик на весь список карточек
+// ===============================
+if (productsContainer) {
+  productsContainer.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-action="add-to-cart"]');
+
+    if (!button) {
+      return;
+    }
+
+    const productId = Number(button.dataset.productId);
+    const selectedProduct = findProductById(products, productId);
+
+    if (!selectedProduct) {
+      console.warn('Товар не найден:', productId);
+      return;
+    }
+
+    console.log(`Товар добавлен в корзину: ${selectedProduct.title}`);
+  });
+}
