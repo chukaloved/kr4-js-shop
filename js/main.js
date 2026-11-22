@@ -157,8 +157,18 @@ if (messageElement) {
 }
 
 if (productOutputElement) {
-  productOutputElement.textContent = getProductTitles(products).join('\n');
+  const cheapest = sortProductsByPrice(products, 'asc')[0];
+  const statsLines = [
+    `Всего товаров: ${products.length}`,
+    `В наличии: ${countAvailableProducts(products)}`,
+    `Общая стоимость каталога: ${formatPrice(calculateTotalPrice(products))}`,
+    `Средняя цена: ${formatPrice(calculateAveragePrice(products))}`,
+    `Самый доступный товар: ${cheapest.title} — ${formatPrice(cheapest.price)}`
+  ];
+
+  productOutputElement.textContent = statsLines.join('\n');
 }
+
 
 
 const desktopQuery = window.matchMedia('(min-width: 1024px)');
