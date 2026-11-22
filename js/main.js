@@ -2,6 +2,53 @@ console.log('Файл main.js подключён');
 console.log(product);
 console.table(product);
 
+
+// ===============================
+// 0. Функции для работы с товаром
+// ===============================
+function formatPrice(price) {
+  return `${price.toLocaleString('ru-RU')} ₽`;
+}
+
+function calculateDiscount(price, discountPercent) {
+  return Math.round(price * discountPercent / 100);
+}
+
+function calculateFinalPrice(price, discountPercent) {
+  const discountValue = calculateDiscount(price, discountPercent);
+  return price - discountValue;
+}
+
+function getProductStatus(product) {
+  if (product.isAvailable) {
+    return 'В наличии';
+  }
+
+  return 'Нет в наличии';
+}
+
+function createProductSummary(product) {
+  const finalPrice = calculateFinalPrice(product.price, product.discountPercent);
+  const status = getProductStatus(product);
+
+  return `${product.title}: ${formatPrice(finalPrice)}. Статус: ${status}.`;
+}
+
+const discountValue = calculateDiscount(product.price, product.discountPercent);
+const finalPrice = calculateFinalPrice(product.price, product.discountPercent);
+const productSummary = createProductSummary(product);
+
+console.log(formatPrice(product.price));
+console.log('Скидка:', formatPrice(discountValue));
+console.log('Цена со скидкой:', formatPrice(finalPrice));
+console.log(getProductStatus(product));
+console.log(productSummary);
+
+const isExpensive = product.price > 10000;
+const canBuyWithDiscount = product.isAvailable && product.discountPercent > 0;
+console.log('Дороже 10 000 ₽:', isExpensive);
+console.log('Можно купить со скидкой:', canBuyWithDiscount);
+
 const desktopQuery = window.matchMedia('(min-width: 1024px)');
 
 
