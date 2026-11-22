@@ -1,6 +1,5 @@
 console.log('Файл main.js подключён');
-console.log(product);
-console.table(product);
+console.table(products);
 
 
 // ===============================
@@ -34,20 +33,38 @@ function createProductSummary(product) {
   return `${product.title}: ${formatPrice(finalPrice)}. Статус: ${status}.`;
 }
 
-const discountValue = calculateDiscount(product.price, product.discountPercent);
-const finalPrice = calculateFinalPrice(product.price, product.discountPercent);
-const productSummary = createProductSummary(product);
 
-console.log(formatPrice(product.price));
-console.log('Скидка:', formatPrice(discountValue));
-console.log('Цена со скидкой:', formatPrice(finalPrice));
-console.log(getProductStatus(product));
-console.log(productSummary);
+// ===============================
+// 0.1. Работа с массивом товаров
+// ===============================
+console.log('Количество товаров:', products.length);
 
-const isExpensive = product.price > 10000;
-const canBuyWithDiscount = product.isAvailable && product.discountPercent > 0;
-console.log('Дороже 10 000 ₽:', isExpensive);
-console.log('Можно купить со скидкой:', canBuyWithDiscount);
+for (let i = 0; i < products.length; i++) {
+  console.log(`${i + 1}. ${products[i].title}`);
+}
+
+for (const item of products) {
+  if (item.discountPercent > 0) {
+    console.log(`Скидка ${item.discountPercent}%: ${item.title}`);
+  } else if (!item.isAvailable) {
+    console.log(`Нет в наличии: ${item.title}`);
+  }
+}
+
+products.forEach((item) => {
+  console.log(createProductSummary(item));
+});
+
+function getProductTitles(products) {
+  return products.map((product) => product.title);
+}
+
+function getAvailableProducts(products) {
+  return products.filter((product) => product.isAvailable);
+}
+
+console.log('Названия товаров:', getProductTitles(products));
+console.log('Товары в наличии:', getAvailableProducts(products));
 
 const messageElement = document.querySelector('.js-message');
 const productOutputElement = document.querySelector('.product-output');
@@ -56,10 +73,10 @@ if (messageElement) {
   messageElement.textContent = 'JavaScript подключён корректно.';
 }
 
-// textContent выводит строку как обычный текст, а не как HTML-разметку
 if (productOutputElement) {
-  productOutputElement.textContent = productSummary;
+  productOutputElement.textContent = getProductTitles(products).join('\n');
 }
+
 
 const desktopQuery = window.matchMedia('(min-width: 1024px)');
 
