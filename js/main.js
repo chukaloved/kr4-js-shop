@@ -96,66 +96,7 @@ document.addEventListener('input', (event) => {
 
 
 // ===============================
-// 4. Модальное окно заказа на главной
-// ===============================
-const orderDialog = document.getElementById('order-dialog');
-const orderForm = document.getElementById('order-form');
-const selectedProductInput = document.getElementById('selected-product');
-const dialogProductText = document.getElementById('order-dialog-product');
-const successMessage = document.getElementById('success-message');
-let lastTrigger = null;
-
-if (orderDialog && orderForm) {
-  document.querySelectorAll('.product-card__button[data-product]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const productName = button.dataset.product;
-
-      lastTrigger = button;
-      selectedProductInput.value = productName;
-      dialogProductText.textContent = `Товар: ${productName}`;
-
-      orderDialog.showModal();
-      orderDialog.querySelector('input:not([type="hidden"])').focus();
-    });
-  });
-
-  orderDialog.querySelectorAll('[data-close-dialog]').forEach((button) => {
-    button.addEventListener('click', () => orderDialog.close());
-  });
-
-  // Клик по затемнённому фону закрывает окно
-  orderDialog.addEventListener('click', (event) => {
-    if (event.target !== orderDialog) return;
-
-    const rect = orderDialog.getBoundingClientRect();
-    const isOutside =
-      event.clientX < rect.left || event.clientX > rect.right ||
-      event.clientY < rect.top || event.clientY > rect.bottom;
-
-    if (isOutside) orderDialog.close();
-  });
-
-  // Esc закрывает <dialog> сам; после закрытия возвращаем фокус на кнопку «Заказать»
-  orderDialog.addEventListener('close', () => {
-    if (lastTrigger) lastTrigger.focus();
-  });
-
-  orderForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    if (!validateForm(orderForm)) return;
-
-    orderForm.reset();
-    orderDialog.close();
-
-    successMessage.hidden = false;
-    console.log('Заявка из модального окна отправлена:', selectedProductInput.value);
-  });
-}
-
-
-// ===============================
-// 5. Отдельные формы: заказ и обратная связь
+// 4. Отдельные формы: заказ и обратная связь
 // ===============================
 function setupPageForm(formId, successId) {
   const form = document.getElementById(formId);
@@ -181,7 +122,7 @@ setupPageForm('feedback-form', 'feedback-success');
 
 
 // ===============================
-// 6. Предвыбор товара на странице заказа (order.html?product=...)
+// 5. Предвыбор товара на странице заказа (order.html?product=...)
 // ===============================
 const productSelect = document.getElementById('order-product');
 
