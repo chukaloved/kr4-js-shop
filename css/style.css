@@ -552,6 +552,33 @@ summary:focus-visible,
   margin-top: auto;
 }
 
+.product-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-card__link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.product-card__meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.product-card__status {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.product-card__status--out {
+  color: var(--color-danger);
+}
+
 /* ===============================
    10. Каталог
    =============================== */

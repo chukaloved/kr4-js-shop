@@ -50,3 +50,21 @@ function createElement(tagName, className, text) {
 
   return element;
 }
+
+// Изображение товара с адаптивными размерами (srcset / sizes)
+function createProductImage(product, className, sizes) {
+  const image = document.createElement('img');
+  const widths = [480, 640, 960];
+
+  image.className = className;
+  image.src = `images/${product.image}-640.webp`;
+  image.srcset = widths.map((width) => `images/${product.image}-${width}.webp ${width}w`).join(', ');
+  image.sizes = sizes;
+  image.width = product.imageWidth;
+  image.height = product.imageHeight;
+  image.alt = product.alt;
+  image.loading = 'lazy';
+  image.decoding = 'async';
+
+  return image;
+}
