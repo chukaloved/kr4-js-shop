@@ -120,6 +120,35 @@ console.log(
   getProductTitles(getPreparedProducts(products, 'fifine', 'microphone', 'desc'))
 );
 
+function calculateTotalPrice(products) {
+  return products.reduce((total, product) => total + product.price, 0);
+}
+
+function countAvailableProducts(products) {
+  let count = 0;
+
+  for (const product of products) {
+    if (product.isAvailable) {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+function calculateAveragePrice(products) {
+  if (products.length === 0) {
+    return 0;
+  }
+
+  return Math.round(calculateTotalPrice(products) / products.length);
+}
+
+console.log('Общая стоимость:', formatPrice(calculateTotalPrice(products)));
+console.log('В наличии:', countAvailableProducts(products));
+console.log('Средняя цена:', formatPrice(calculateAveragePrice(products)));
+console.log('Средняя цена пустого массива:', calculateAveragePrice([]));
+
 const messageElement = document.querySelector('.js-message');
 const productOutputElement = document.querySelector('.product-output');
 
