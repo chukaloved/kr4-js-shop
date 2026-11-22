@@ -1049,21 +1049,3 @@ summary:focus-visible,
   align-items: center;
   min-height: var(--tap-size);
 }
-
-/* ===============================
-   17. Учебный блок проверки JavaScript
-   =============================== */
-.js-message {
-  margin: 0 0 var(--space-md);
-  font-weight: 700;
-}
-
-.product-output {
-  margin: 0;
-  padding: var(--space-md);
-  overflow-x: auto;
-  white-space: pre-wrap;
-  color: #f9fafb;
-  background-color: #111827;
-  border-radius: var(--radius-md);
-}
