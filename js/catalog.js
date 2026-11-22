@@ -161,10 +161,6 @@ function renderProducts(container, productsToRender, options) {
 const productsContainer = document.querySelector('[data-products-container]');
 const popularContainer = document.querySelector('[data-popular-container]');
 
-if (productsContainer) {
-  renderProducts(productsContainer, products);
-}
-
 // На главной выводятся только популярные товары
 if (popularContainer) {
   const popularProducts = products.filter((product) => product.isPopular);
@@ -173,4 +169,79 @@ if (popularContainer) {
     idPrefix: 'popular',
     sizes: POPULAR_IMAGE_SIZES
   });
+}
+
+
+// ===============================
+// 4. Состояние каталога: поиск, фильтр, сортировка
+// ===============================
+const catalogState = {
+  query: '',
+  category: 'all',
+  sort: 'default'
+};
+
+const catalogControls = document.querySelector('#catalog-controls');
+const searchInput = document.querySelector('#catalog-search');
+const categoryFilter = document.querySelector('#category-filter');
+const sortSelect = document.querySelector('#sort-select');
+const catalogCount = document.querySelector('.catalog-count');
+const catalogEmpty = document.querySelector('.catalog-empty');
+
+function updateCatalog() {
+  const preparedProducts = getPreparedProducts(products, catalogState);
+
+  renderProducts(productsContainer, preparedProducts);
+
+  if (catalogCount) {
+    catalogCount.textContent = `Найдено товаров: ${preparedProducts.length} из ${products.length}`;
+  }
+
+  if (catalogEmpty) {
+    catalogEmpty.hidden = preparedProducts.length > 0;
+  }
+}
+
+if (productsContainer) {
+  if (catalogControls) {
+    // Enter в поле поиска не должен перезагружать страницу
+    catalogControls.addEventListener('submit', (event) => {
+      event.preventDefault();
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (event) => {
+      catalogState.query = event.target.value;
+      updateCatalog();
+    });
+  }
+
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', (event) => {
+      catalogState.category = event.target.value;
+      updateCatalog();
+    });
+  }
+
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (event) => {
+      catalogState.sort = event.target.value;
+      updateCatalog();
+    });
+  }
+
+  updateCatalog();
+}
+
+
+// ===============================
+// 5. Краткая статистика каталога
+// ===============================
+const catalogSummary = document.querySelector('.catalog-summary');
+
+if (catalogSummary) {
+  catalogSummary.textContent =
+    `В каталоге ${products.length} товаров, в наличии ${countAvailableProducts(products)}. ` +
+    `Средняя цена — ${formatPrice(calculateAveragePrice(products))}.`;
 }

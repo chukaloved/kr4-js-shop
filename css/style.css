@@ -687,6 +687,11 @@ summary:focus-visible,
   border-color: var(--color-primary);
 }
 
+.catalog-summary {
+  margin: var(--space-sm) 0 0;
+  font-weight: 700;
+}
+
 .catalog-count {
   margin: 0 0 var(--space-md);
   color: var(--color-muted);
