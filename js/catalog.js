@@ -94,7 +94,6 @@ const CATALOG_IMAGE_SIZES = '(min-width: 1280px) 260px, (min-width: 1024px) 34vw
 const POPULAR_IMAGE_SIZES = '(min-width: 1100px) 340px, (min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw';
 
 function createProductCard(product, options = {}) {
-  const action = options.action || 'add-to-cart';
   const titleId = `card-${options.idPrefix || 'catalog'}-${product.id}`;
 
   const card = createElement('article', 'product-card');
@@ -119,19 +118,11 @@ function createProductCard(product, options = {}) {
   const footer = createElement('div', 'product-card__footer');
   const price = createElement('p', 'product-card__price', formatPrice(getFinalPrice(product)));
 
-  const button = createElement('button', 'button button--primary product-card__button');
+  const button = createElement('button', 'button button--primary product-card__button', 'В корзину');
   button.type = 'button';
-  button.dataset.action = action;
+  button.dataset.action = 'add-to-cart';
   button.dataset.productId = String(product.id);
-
-  if (action === 'order') {
-    button.textContent = 'Заказать';
-    button.dataset.product = product.title;
-  } else {
-    button.textContent = 'В корзину';
-  }
-
-  button.setAttribute('aria-label', `${button.textContent}: ${product.title}`);
+  button.setAttribute('aria-label', `В корзину: ${product.title}`);
 
   if (!product.isAvailable) {
     button.disabled = true;
@@ -140,6 +131,16 @@ function createProductCard(product, options = {}) {
 
   footer.append(price, button);
   card.append(image, title, meta, description, status, footer);
+
+  // На главной у карточки есть быстрый заказ через модальное окно
+  if (options.quickOrder && product.isAvailable) {
+    const quickOrderButton = createElement('button', 'button button--secondary product-card__quick', 'Купить в 1 клик');
+    quickOrderButton.type = 'button';
+    quickOrderButton.dataset.action = 'order';
+    quickOrderButton.dataset.product = product.title;
+    quickOrderButton.setAttribute('aria-label', `Купить в 1 клик: ${product.title}`);
+    card.append(quickOrderButton);
+  }
 
   return card;
 }
@@ -165,7 +166,7 @@ const popularContainer = document.querySelector('[data-popular-container]');
 if (popularContainer) {
   const popularProducts = products.filter((product) => product.isPopular);
   renderProducts(popularContainer, popularProducts, {
-    action: 'order',
+    quickOrder: true,
     idPrefix: 'popular',
     sizes: POPULAR_IMAGE_SIZES
   });
@@ -246,26 +247,3 @@ if (catalogSummary) {
     `Средняя цена — ${formatPrice(calculateAveragePrice(products))}.`;
 }
 
-
-// ===============================
-// 6. Делегирование событий: один обработчик на весь список карточек
-// ===============================
-if (productsContainer) {
-  productsContainer.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-action="add-to-cart"]');
-
-    if (!button) {
-      return;
-    }
-
-    const productId = Number(button.dataset.productId);
-    const selectedProduct = findProductById(products, productId);
-
-    if (!selectedProduct) {
-      console.warn('Товар не найден:', productId);
-      return;
-    }
-
-    console.log(`Товар добавлен в корзину: ${selectedProduct.title}`);
-  });
-}

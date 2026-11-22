@@ -73,3 +73,25 @@ if (productSelect) {
     productSelect.value = productId;
   }
 }
+
+
+// ===============================
+// 4. Всплывающие уведомления (вместо alert)
+// ===============================
+// Область для уведомлений создаётся сразу при загрузке: так экранные дикторы
+// заранее знают о ней и зачитывают каждое новое сообщение
+const toast = createElement('p', 'toast');
+toast.setAttribute('role', 'status');
+document.body.append(toast);
+
+let toastTimer = null;
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('toast--visible');
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('toast--visible');
+  }, 2500);
+}
