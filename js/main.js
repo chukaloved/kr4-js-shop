@@ -49,6 +49,18 @@ const canBuyWithDiscount = product.isAvailable && product.discountPercent > 0;
 console.log('Дороже 10 000 ₽:', isExpensive);
 console.log('Можно купить со скидкой:', canBuyWithDiscount);
 
+const messageElement = document.querySelector('.js-message');
+const productOutputElement = document.querySelector('.product-output');
+
+if (messageElement) {
+  messageElement.textContent = 'JavaScript подключён корректно.';
+}
+
+// textContent выводит строку как обычный текст, а не как HTML-разметку
+if (productOutputElement) {
+  productOutputElement.textContent = productSummary;
+}
+
 const desktopQuery = window.matchMedia('(min-width: 1024px)');
 
 
