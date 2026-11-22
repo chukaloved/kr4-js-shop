@@ -108,11 +108,25 @@
               <dt>Сумма</dt>
               <dd data-cart-subtotal>0 ₽</dd>
             </div>
+            <div class="cart-summary__row cart-summary__row--discount" data-cart-discount-row hidden>
+              <dt>Скидка по промокоду</dt>
+              <dd data-cart-discount>0 ₽</dd>
+            </div>
             <div class="cart-summary__row cart-summary__row--total">
               <dt>Итого</dt>
               <dd data-cart-total>0 ₽</dd>
             </div>
           </dl>
+          <form class="promo-form" data-promo-form action="#" novalidate>
+            <label class="promo-form__label" for="promo-code">Промокод</label>
+            <div class="promo-form__row">
+              <input class="promo-form__input" id="promo-code" name="promo" type="text" autocomplete="off" placeholder="Например, DEVICE10" aria-describedby="promo-message">
+              <button class="button button--secondary promo-form__button" type="submit">Применить</button>
+            </div>
+            <p class="promo-form__message" id="promo-message" data-promo-message role="status"></p>
+            <button class="promo-form__remove" type="button" data-action="remove-promo" hidden>Отменить промокод</button>
+          </form>
+
           <a class="button button--primary cart-summary__button" href="order.html">Оформить заказ</a>
           <button class="button button--secondary cart-summary__button" type="button" data-action="clear-cart">Очистить корзину</button>
         </aside>

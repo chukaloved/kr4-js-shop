@@ -4,7 +4,14 @@
 // нельзя «подменить» цену товара.
 
 const CART_STORAGE_KEY = 'devicehub-cart';
+const PROMO_STORAGE_KEY = 'devicehub-promo';
 const MAX_QUANTITY = 10;
+
+// Промокоды: процентная скидка или фиксированная сумма с минимальным заказом
+const promoCodes = {
+  DEVICE10: { type: 'percent', value: 10, minTotal: 0, label: 'скидка 10%' },
+  STUDENT500: { type: 'fixed', value: 500, minTotal: 5000, label: 'скидка 500 ₽ на заказ от 5 000 ₽' }
+};
 
 // ===============================
 // 1. Состояние корзины
@@ -119,6 +126,70 @@ function calculateCartTotal(cartDetails) {
   return cartDetails.reduce((total, item) => total + item.lineTotal, 0);
 }
 
+// ===============================
+// 2.1. Промокод
+// ===============================
+let appliedPromoCode = loadFromStorage(PROMO_STORAGE_KEY, null);
+
+if (!promoCodes[appliedPromoCode]) {
+  appliedPromoCode = null;
+}
+
+function applyPromoCode(code) {
+  const normalizedCode = code.trim().toUpperCase();
+
+  if (normalizedCode === '') {
+    return { success: false, message: 'Введите промокод.' };
+  }
+
+  if (!promoCodes[normalizedCode]) {
+    return { success: false, message: `Промокод «${normalizedCode}» не найден.` };
+  }
+
+  appliedPromoCode = normalizedCode;
+  saveToStorage(PROMO_STORAGE_KEY, appliedPromoCode);
+  return { success: true, message: `Промокод ${normalizedCode} применён: ${promoCodes[normalizedCode].label}.` };
+}
+
+function removePromoCode() {
+  appliedPromoCode = null;
+  removeFromStorage(PROMO_STORAGE_KEY);
+}
+
+function calculatePromoDiscount(subtotal, code) {
+  const promo = promoCodes[code];
+
+  if (!promo || subtotal < promo.minTotal) {
+    return 0;
+  }
+
+  if (promo.type === 'percent') {
+    return Math.round(subtotal * promo.value / 100);
+  }
+
+  return Math.min(promo.value, subtotal);
+}
+
+// Все суммы корзины в одном объекте: используется в корзине и на странице заказа
+function getCartTotals() {
+  const cartDetails = getCartDetails();
+  const subtotal = calculateCartTotal(cartDetails);
+  const discount = calculatePromoDiscount(subtotal, appliedPromoCode);
+  const promo = promoCodes[appliedPromoCode];
+
+  return {
+    cartDetails,
+    itemsCount: getCartItemsCount(),
+    subtotal,
+    discount,
+    total: subtotal - discount,
+    promoCode: appliedPromoCode,
+    promoWarning: promo && subtotal < promo.minTotal
+      ? `Промокод ${appliedPromoCode} действует на заказ от ${formatPrice(promo.minTotal)}.`
+      : ''
+  };
+}
+
 function getProductsWord(count) {
   const lastDigit = count % 10;
   const lastTwoDigits = count % 100;
@@ -197,6 +268,12 @@ const cartContent = document.querySelector('.cart-content');
 const cartCountText = document.querySelector('[data-cart-items-count]');
 const cartSubtotal = document.querySelector('[data-cart-subtotal]');
 const cartTotal = document.querySelector('[data-cart-total]');
+const cartDiscountRow = document.querySelector('[data-cart-discount-row]');
+const cartDiscount = document.querySelector('[data-cart-discount]');
+const promoForm = document.querySelector('[data-promo-form]');
+const promoInput = document.querySelector('#promo-code');
+const promoMessage = document.querySelector('[data-promo-message]');
+const promoRemoveButton = document.querySelector('[data-action="remove-promo"]');
 const clearCartButton = document.querySelector('[data-action="clear-cart"]');
 
 function createQuantityButton(action, text, label, productId) {
@@ -254,19 +331,34 @@ function renderCart() {
     return;
   }
 
-  const cartDetails = getCartDetails();
-  const itemsCount = getCartItemsCount();
-  const subtotal = calculateCartTotal(cartDetails);
+  const totals = getCartTotals();
 
   cartList.textContent = '';
-  cartDetails.forEach((item) => cartList.append(createCartItem(item)));
+  totals.cartDetails.forEach((item) => cartList.append(createCartItem(item)));
 
-  cartEmpty.hidden = cartDetails.length > 0;
-  cartContent.hidden = cartDetails.length === 0;
+  cartEmpty.hidden = totals.cartDetails.length > 0;
+  cartContent.hidden = totals.cartDetails.length === 0;
 
-  cartCountText.textContent = `${itemsCount} ${getProductsWord(itemsCount)}`;
-  cartSubtotal.textContent = formatPrice(subtotal);
-  cartTotal.textContent = formatPrice(subtotal);
+  cartCountText.textContent = `${totals.itemsCount} ${getProductsWord(totals.itemsCount)}`;
+  cartSubtotal.textContent = formatPrice(totals.subtotal);
+  cartDiscountRow.hidden = totals.discount === 0;
+  cartDiscount.textContent = `−${formatPrice(totals.discount)}`;
+  cartTotal.textContent = formatPrice(totals.total);
+
+  promoRemoveButton.hidden = !totals.promoCode;
+
+  // Состояние активного промокода показываем при каждой перерисовке
+  if (totals.promoCode) {
+    showPromoMessage(
+      totals.promoWarning || `Промокод ${totals.promoCode} применён: ${promoCodes[totals.promoCode].label}.`,
+      Boolean(totals.promoWarning)
+    );
+  }
+}
+
+function showPromoMessage(text, isError) {
+  promoMessage.textContent = text;
+  promoMessage.classList.toggle('promo-form__message--error', isError);
 }
 
 if (cartList) {
@@ -312,6 +404,27 @@ if (cartList) {
     changeQuantity(productId, Number.isNaN(quantity) ? 1 : quantity);
     renderCart();
   });
+
+  if (promoForm) {
+    promoForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const result = applyPromoCode(promoInput.value);
+
+      if (result.success) {
+        promoInput.value = '';
+        renderCart();
+      } else {
+        showPromoMessage(result.message, true);
+      }
+    });
+
+    promoRemoveButton.addEventListener('click', () => {
+      removePromoCode();
+      renderCart();
+      showPromoMessage('Промокод отменён.', false);
+    });
+  }
 
   if (clearCartButton) {
     clearCartButton.addEventListener('click', () => {
