@@ -62,67 +62,7 @@ if (catalogFilters) {
 
 
 // ===============================
-// 3. Проверка формы и вывод ошибок
-// ===============================
-function validateForm(form) {
-  const fields = Array.from(form.elements).filter((element) => element.willValidate);
-  let firstInvalid = null;
-
-  fields.forEach((field) => {
-    field.removeAttribute('aria-invalid');
-
-    if (!field.checkValidity()) {
-      field.setAttribute('aria-invalid', 'true');
-      firstInvalid = firstInvalid || field;
-    }
-  });
-
-  if (firstInvalid) {
-    form.reportValidity();
-    firstInvalid.focus();
-    return false;
-  }
-
-  return true;
-}
-
-// Снимаем красную рамку, как только поле исправлено
-document.addEventListener('input', (event) => {
-  const field = event.target;
-  if (field.hasAttribute && field.hasAttribute('aria-invalid') && field.checkValidity()) {
-    field.removeAttribute('aria-invalid');
-  }
-});
-
-
-// ===============================
-// 4. Отдельные формы: заказ и обратная связь
-// ===============================
-function setupPageForm(formId, successId) {
-  const form = document.getElementById(formId);
-  const success = document.getElementById(successId);
-
-  if (!form || !success) return;
-
-  form.addEventListener('submit', (event) => {
-    // Отменяем отправку: на GitHub Pages нет сервера для POST
-    event.preventDefault();
-
-    if (!validateForm(form)) return;
-
-    form.reset();
-    form.hidden = true;
-    success.hidden = false;
-    success.focus();
-  });
-}
-
-setupPageForm('order-page-form', 'order-success');
-setupPageForm('feedback-form', 'feedback-success');
-
-
-// ===============================
-// 5. Предвыбор товара на странице заказа (order.html?product=...)
+// 3. Предвыбор товара на странице заказа (order.html?product=...)
 // ===============================
 const productSelect = document.getElementById('order-product');
 

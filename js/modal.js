@@ -55,17 +55,11 @@ if (orderDialog && dialogForm) {
     }
   });
 
-  dialogForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    if (!validateForm(dialogForm)) {
-      return;
-    }
-
-    dialogForm.reset();
-    orderDialog.close();
-
-    dialogSuccessMessage.hidden = false;
+  setupFormValidation(dialogForm, (form) => {
     console.log('Заявка из модального окна подготовлена:', selectedProductInput.value);
+
+    form.reset();
+    orderDialog.close();
+    dialogSuccessMessage.hidden = false;
   });
 }

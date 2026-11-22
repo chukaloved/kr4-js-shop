@@ -951,6 +951,31 @@ summary:focus-visible,
 
 [aria-invalid="true"] {
   border-color: var(--color-danger);
+  box-shadow: 0 0 0 1px var(--color-danger);
+}
+
+.form-error {
+  margin: var(--space-xs) 0 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.form-error:empty {
+  display: none;
+}
+
+.form-message {
+  margin: 0 0 var(--space-md);
+  font-weight: 700;
+}
+
+.form-message:empty {
+  display: none;
+}
+
+.form-message--error {
+  color: var(--color-danger);
 }
 
 /* ===============================
