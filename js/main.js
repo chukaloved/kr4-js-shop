@@ -62,14 +62,61 @@ if (catalogFilters) {
 
 
 // ===============================
-// 3. Предвыбор товара на странице заказа (order.html?product=...)
+// 3. Всплывающие уведомления (вместо alert)
 // ===============================
-const productSelect = document.getElementById('order-product');
+// Область для уведомлений создаётся сразу при загрузке: так экранные дикторы
+// заранее знают о ней и зачитывают каждое новое сообщение
+const toast = createElement('p', 'toast');
+toast.setAttribute('role', 'status');
+document.body.append(toast);
 
-if (productSelect) {
-  const productId = new URLSearchParams(window.location.search).get('product');
+let toastTimer = null;
 
-  if (productId && productSelect.querySelector(`option[value="${CSS.escape(productId)}"]`)) {
-    productSelect.value = productId;
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('toast--visible');
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('toast--visible');
+  }, 2500);
+}
+
+
+// ===============================
+// 4. Переключатель темы (выбор сохраняется в localStorage)
+// ===============================
+const THEME_STORAGE_KEY = 'devicehub-theme';
+const themeToggle = document.querySelector('.theme-toggle');
+const systemDarkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+function getCurrentTheme() {
+  const selectedTheme = document.documentElement.dataset.theme;
+
+  if (selectedTheme) {
+    return selectedTheme;
   }
+
+  return systemDarkQuery.matches ? 'dark' : 'light';
+}
+
+function updateThemeToggle() {
+  if (themeToggle) {
+    themeToggle.setAttribute('aria-pressed', String(getCurrentTheme() === 'dark'));
+  }
+}
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.dataset.theme = nextTheme;
+    saveToStorage(THEME_STORAGE_KEY, nextTheme);
+    updateThemeToggle();
+    showToast(nextTheme === 'dark' ? 'Включена тёмная тема' : 'Включена светлая тема');
+  });
+
+  // Пока пользователь не выбрал тему сам, следуем за настройкой системы
+  systemDarkQuery.addEventListener('change', updateThemeToggle);
+  updateThemeToggle();
 }

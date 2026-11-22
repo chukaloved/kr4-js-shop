@@ -57,6 +57,11 @@ function sortProducts(products, sortType) {
 
 function getPreparedProducts(products, state) {
   let result = searchProducts(products, state.query);
+
+  if (state.onlyAvailable) {
+    result = getAvailableProducts(result);
+  }
+
   result = filterProductsByCategory(result, state.category);
   result = sortProducts(result, state.sort);
   return result;
@@ -93,14 +98,57 @@ function calculateAveragePrice(products) {
 const CATALOG_IMAGE_SIZES = '(min-width: 1280px) 260px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 100vw';
 const POPULAR_IMAGE_SIZES = '(min-width: 1100px) 340px, (min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw';
 
+function createProductBadges(product) {
+  const badges = createElement('ul', 'product-card__badges');
+  badges.setAttribute('aria-label', 'Метки товара');
+
+  if (product.isPopular) {
+    badges.append(createElement('li', 'badge badge--popular', 'Хит'));
+  }
+
+  if (product.discountPercent > 0) {
+    badges.append(createElement('li', 'badge badge--discount', `−${product.discountPercent}%`));
+  }
+
+  return badges;
+}
+
+function createProductPrice(product, className) {
+  const price = createElement('p', className);
+  const current = createElement('span', `${className}-current`, formatPrice(getFinalPrice(product)));
+  price.append(current);
+
+  // Старая цена показывается, только если есть скидка
+  if (product.discountPercent > 0) {
+    const old = createElement('s', `${className}-old`, formatPrice(product.price));
+    old.setAttribute('aria-label', `Старая цена ${formatPrice(product.price)}`);
+    price.append(' ', old);
+  }
+
+  return price;
+}
+
 function createProductCard(product, options = {}) {
-  const action = options.action || 'add-to-cart';
   const titleId = `card-${options.idPrefix || 'catalog'}-${product.id}`;
 
   const card = createElement('article', 'product-card');
   card.setAttribute('aria-labelledby', titleId);
 
+  if (product.isPopular) {
+    card.classList.add('product-card--featured');
+  }
+
+  if (product.discountPercent > 0) {
+    card.classList.add('product-card--discount');
+  }
+
+  if (!product.isAvailable) {
+    card.classList.add('product-card--out');
+  }
+
+  const media = createElement('div', 'product-card__media');
   const image = createProductImage(product, 'product-card__image', options.sizes || CATALOG_IMAGE_SIZES);
+  media.append(image, createProductBadges(product), createFavoriteButton(product));
 
   const title = createElement('h3', 'product-card__title');
   title.id = titleId;
@@ -117,21 +165,13 @@ function createProductCard(product, options = {}) {
   }
 
   const footer = createElement('div', 'product-card__footer');
-  const price = createElement('p', 'product-card__price', formatPrice(getFinalPrice(product)));
+  const price = createProductPrice(product, 'product-card__price');
 
-  const button = createElement('button', 'button button--primary product-card__button');
+  const button = createElement('button', 'button button--primary product-card__button', 'В корзину');
   button.type = 'button';
-  button.dataset.action = action;
+  button.dataset.action = 'add-to-cart';
   button.dataset.productId = String(product.id);
-
-  if (action === 'order') {
-    button.textContent = 'Заказать';
-    button.dataset.product = product.title;
-  } else {
-    button.textContent = 'В корзину';
-  }
-
-  button.setAttribute('aria-label', `${button.textContent}: ${product.title}`);
+  button.setAttribute('aria-label', `В корзину: ${product.title}`);
 
   if (!product.isAvailable) {
     button.disabled = true;
@@ -139,7 +179,17 @@ function createProductCard(product, options = {}) {
   }
 
   footer.append(price, button);
-  card.append(image, title, meta, description, status, footer);
+  card.append(media, title, meta, description, status, footer);
+
+  // На главной у карточки есть быстрый заказ через модальное окно
+  if (options.quickOrder && product.isAvailable) {
+    const quickOrderButton = createElement('button', 'button button--secondary product-card__quick', 'Купить в 1 клик');
+    quickOrderButton.type = 'button';
+    quickOrderButton.dataset.action = 'order';
+    quickOrderButton.dataset.product = product.title;
+    quickOrderButton.setAttribute('aria-label', `Купить в 1 клик: ${product.title}`);
+    card.append(quickOrderButton);
+  }
 
   return card;
 }
@@ -165,7 +215,7 @@ const popularContainer = document.querySelector('[data-popular-container]');
 if (popularContainer) {
   const popularProducts = products.filter((product) => product.isPopular);
   renderProducts(popularContainer, popularProducts, {
-    action: 'order',
+    quickOrder: true,
     idPrefix: 'popular',
     sizes: POPULAR_IMAGE_SIZES
   });
@@ -175,18 +225,65 @@ if (popularContainer) {
 // ===============================
 // 4. Состояние каталога: поиск, фильтр, сортировка
 // ===============================
-const catalogState = {
+const defaultCatalogState = {
   query: '',
   category: 'all',
-  sort: 'default'
+  sort: 'default',
+  onlyAvailable: false
 };
+
+// Копия объекта: при сбросе фильтров возвращаемся к значениям по умолчанию
+const catalogState = { ...defaultCatalogState };
 
 const catalogControls = document.querySelector('#catalog-controls');
 const searchInput = document.querySelector('#catalog-search');
 const categoryFilter = document.querySelector('#category-filter');
 const sortSelect = document.querySelector('#sort-select');
+const availableFilter = document.querySelector('#available-filter');
+const emptyHint = document.querySelector('[data-empty-hint]');
+const emptySuggestions = document.querySelector('[data-empty-suggestions]');
 const catalogCount = document.querySelector('.catalog-count');
 const catalogEmpty = document.querySelector('.catalog-empty');
+
+function isCatalogFiltered() {
+  return Object.keys(defaultCatalogState).some((key) => catalogState[key] !== defaultCatalogState[key]);
+}
+
+// Пояснение в пустом состоянии: что именно мешает найти товары
+function getEmptyHint() {
+  const reasons = [];
+
+  if (catalogState.query.trim() !== '') {
+    reasons.push(`запрос «${catalogState.query.trim()}»`);
+  }
+
+  if (catalogState.category !== 'all') {
+    reasons.push(`категория «${getCategoryName(catalogState.category)}»`);
+  }
+
+  if (catalogState.onlyAvailable) {
+    reasons.push('только товары в наличии');
+  }
+
+  return reasons.length > 0 ? `Условия поиска: ${reasons.join(', ')}. Попробуйте изменить их или поищите:` : '';
+}
+
+// Подсказки — бренды самых высоко оценённых товаров
+function renderEmptySuggestions() {
+  const brands = sortProducts(products, 'rating-desc').map((product) => product.title.split(' ')[1]);
+  const uniqueBrands = [...new Set(brands)].slice(0, 4);
+
+  emptySuggestions.textContent = '';
+  uniqueBrands.forEach((brand) => {
+    const item = createElement('li');
+    const button = createElement('button', 'catalog-empty__suggestion', brand);
+    button.type = 'button';
+    button.dataset.action = 'suggest';
+    button.dataset.query = brand;
+    item.append(button);
+    emptySuggestions.append(item);
+  });
+}
 
 function updateCatalog() {
   const preparedProducts = getPreparedProducts(products, catalogState);
@@ -199,7 +296,27 @@ function updateCatalog() {
 
   if (catalogEmpty) {
     catalogEmpty.hidden = preparedProducts.length > 0;
+    emptyHint.textContent = getEmptyHint();
   }
+
+  document.querySelectorAll('[data-action="reset-filters"]').forEach((button) => {
+    button.disabled = !isCatalogFiltered();
+  });
+}
+
+// Переносим состояние обратно в элементы управления (после сброса или подсказки)
+function syncCatalogControls() {
+  searchInput.value = catalogState.query;
+  categoryFilter.value = catalogState.category;
+  sortSelect.value = catalogState.sort;
+  availableFilter.checked = catalogState.onlyAvailable;
+}
+
+function resetCatalog() {
+  Object.assign(catalogState, defaultCatalogState);
+  syncCatalogControls();
+  updateCatalog();
+  showToast('Фильтры сброшены');
 }
 
 if (productsContainer) {
@@ -231,6 +348,35 @@ if (productsContainer) {
     });
   }
 
+  if (availableFilter) {
+    availableFilter.addEventListener('change', (event) => {
+      catalogState.onlyAvailable = event.target.checked;
+      updateCatalog();
+    });
+  }
+
+  // Кнопки «Сбросить фильтры» и подсказки в пустом состоянии
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-action="reset-filters"], [data-action="suggest"]');
+
+    if (!button) {
+      return;
+    }
+
+    if (button.dataset.action === 'reset-filters') {
+      resetCatalog();
+      return;
+    }
+
+    Object.assign(catalogState, defaultCatalogState, { query: button.dataset.query });
+    syncCatalogControls();
+    updateCatalog();
+  });
+
+  if (emptySuggestions) {
+    renderEmptySuggestions();
+  }
+
   updateCatalog();
 }
 
@@ -246,26 +392,3 @@ if (catalogSummary) {
     `Средняя цена — ${formatPrice(calculateAveragePrice(products))}.`;
 }
 
-
-// ===============================
-// 6. Делегирование событий: один обработчик на весь список карточек
-// ===============================
-if (productsContainer) {
-  productsContainer.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-action="add-to-cart"]');
-
-    if (!button) {
-      return;
-    }
-
-    const productId = Number(button.dataset.productId);
-    const selectedProduct = findProductById(products, productId);
-
-    if (!selectedProduct) {
-      console.warn('Товар не найден:', productId);
-      return;
-    }
-
-    console.log(`Товар добавлен в корзину: ${selectedProduct.title}`);
-  });
-}

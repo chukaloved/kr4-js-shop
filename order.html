@@ -8,10 +8,24 @@
   <title>Оформление заказа — DeviceHub</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/responsive.css">
-  <script>document.documentElement.classList.add('js');</script>
+  <script>
+    document.documentElement.classList.add('js');
+    // Тема применяется до отрисовки страницы, чтобы не было мигания
+    try {
+      const savedTheme = JSON.parse(localStorage.getItem('devicehub-theme'));
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        document.documentElement.dataset.theme = savedTheme;
+      }
+    } catch (error) {
+      // localStorage недоступен — используется тема системы
+    }
+  </script>
   <script src="js/data.js" defer></script>
+  <script src="js/storage.js" defer></script>
   <script src="js/utils.js" defer></script>
+  <script src="js/cart.js" defer></script>
   <script src="js/validation.js" defer></script>
+  <script src="js/order.js" defer></script>
   <script src="js/main.js" defer></script>
 </head>
 
@@ -21,6 +35,23 @@
   <header class="site-header">
     <div class="site-header__inner">
       <a class="site-header__logo" href="index.html">DeviceHub</a>
+
+      <div class="site-header__actions">
+        <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Тёмная тема">
+          <svg class="theme-toggle__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor"/>
+          </svg>
+        </button>
+        <a class="header-cart" href="cart.html" aria-label="Корзина">
+          <svg class="header-cart__icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H6.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="10" cy="20" r="1.5" fill="currentColor"/>
+            <circle cx="17" cy="20" r="1.5" fill="currentColor"/>
+          </svg>
+          <span class="header-cart__text">Корзина</span>
+          <span class="header-cart__count" data-cart-count>0</span>
+        </a>
+      </div>
 
       <button
         class="nav-toggle"
@@ -48,12 +79,6 @@
           </li>
           <li class="site-nav__item">
             <a class="site-nav__link" href="contacts.html">Контакты</a>
-          </li>
-          <li class="site-nav__item">
-            <a class="site-nav__link" href="index.html#advantages">Преимущества</a>
-          </li>
-          <li class="site-nav__item">
-            <a class="site-nav__link" href="index.html#popular">Популярные товары</a>
           </li>
           <li class="site-nav__item">
             <a class="site-nav__link" href="contacts.html#feedback">Обратная связь</a>
@@ -98,16 +123,19 @@
         <fieldset class="order-form__fieldset">
           <legend class="order-form__legend">Заказ и доставка</legend>
           <div class="order-form__grid">
-        <div class="order-form__field">
+        <div class="order-cart order-form__field--wide" data-order-cart hidden>
+          <p class="order-cart__title">Товары из корзины</p>
+          <ul class="order-cart__list" data-order-cart-list></ul>
+          <p class="order-cart__total" data-order-cart-total></p>
+          <a class="order-cart__link" href="cart.html">Изменить корзину</a>
+        </div>
+        <div class="order-form__field" data-single-product>
           <label class="order-form__label" for="order-product">Товар <span class="order-form__required" aria-hidden="true">*</span></label>
           <select class="order-form__select" id="order-product" name="product" required>
             <option value="">Выберите товар</option>
-            <option value="logitech-g-pro-x">Logitech G Pro X — 12&nbsp;899&nbsp;₽</option>
-            <option value="fifine-am8">Fifine AM8 — 4&nbsp;799&nbsp;₽</option>
-            <option value="fifine-am8t">Fifine AM8T — 5&nbsp;499&nbsp;₽</option>
           </select>
         </div>
-        <div class="order-form__field">
+        <div class="order-form__field" data-single-product>
           <label class="order-form__label" for="order-quantity">Количество <span class="order-form__required" aria-hidden="true">*</span></label>
           <input class="order-form__input" id="order-quantity" name="quantity" type="number" min="1" max="10" value="1" inputmode="numeric" required>
         </div>
@@ -121,7 +149,8 @@
         </div>
         <div class="order-form__field">
           <label class="order-form__label" for="order-address">Адрес доставки</label>
-          <input class="order-form__input" id="order-address" name="address" type="text" placeholder="Город, улица, дом, квартира" autocomplete="street-address">
+          <input class="order-form__input" id="order-address" name="address" type="text" placeholder="Город, улица, дом, квартира" autocomplete="street-address" aria-describedby="order-address-hint">
+          <small class="order-form__hint" id="order-address-hint">Обязателен при курьерской доставке</small>
         </div>
         <div class="order-form__field order-form__field--wide">
           <label class="order-form__label" for="order-comment">Комментарий</label>
@@ -138,14 +167,14 @@
         </div>
 
         <div class="order-form__actions">
-          <a class="button button--secondary" href="product.html">Вернуться к товарам</a>
+          <a class="button button--secondary" href="catalog.html">Вернуться в каталог</a>
           <button class="button button--primary" type="submit">Отправить заявку</button>
         </div>
       </form>
 
       <div class="success-message" id="order-success" role="status" tabindex="-1" hidden>
         <h2>Заявка успешно отправлена!</h2>
-        <p>Спасибо за заказ. Мы свяжемся с вами для подтверждения.</p>
+        <p data-order-success-text>Спасибо за заказ. Мы свяжемся с вами для подтверждения.</p>
         <a class="button button--primary" href="index.html">Вернуться на главную</a>
       </div>
     </section>
@@ -161,7 +190,7 @@
         </ul>
       </nav>
       <p>&copy; 2026 DeviceHub. Все права защищены.</p>
-      <p>Дисциплина: Фронтенд и бэкенд разработка</p>
+      <p>Чукалов Егор, ЭФБО-03-25 · Фронтенд и бэкенд разработка</p>
     </div>
   </footer>
 </body>
