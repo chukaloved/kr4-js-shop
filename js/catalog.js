@@ -93,13 +93,57 @@ function calculateAveragePrice(products) {
 const CATALOG_IMAGE_SIZES = '(min-width: 1280px) 260px, (min-width: 1024px) 34vw, (min-width: 768px) 45vw, 100vw';
 const POPULAR_IMAGE_SIZES = '(min-width: 1100px) 340px, (min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw';
 
+function createProductBadges(product) {
+  const badges = createElement('ul', 'product-card__badges');
+  badges.setAttribute('aria-label', 'Метки товара');
+
+  if (product.isPopular) {
+    badges.append(createElement('li', 'badge badge--popular', 'Хит'));
+  }
+
+  if (product.discountPercent > 0) {
+    badges.append(createElement('li', 'badge badge--discount', `−${product.discountPercent}%`));
+  }
+
+  return badges;
+}
+
+function createProductPrice(product, className) {
+  const price = createElement('p', className);
+  const current = createElement('span', `${className}-current`, formatPrice(getFinalPrice(product)));
+  price.append(current);
+
+  // Старая цена показывается, только если есть скидка
+  if (product.discountPercent > 0) {
+    const old = createElement('s', `${className}-old`, formatPrice(product.price));
+    old.setAttribute('aria-label', `Старая цена ${formatPrice(product.price)}`);
+    price.append(' ', old);
+  }
+
+  return price;
+}
+
 function createProductCard(product, options = {}) {
   const titleId = `card-${options.idPrefix || 'catalog'}-${product.id}`;
 
   const card = createElement('article', 'product-card');
   card.setAttribute('aria-labelledby', titleId);
 
+  if (product.isPopular) {
+    card.classList.add('product-card--featured');
+  }
+
+  if (product.discountPercent > 0) {
+    card.classList.add('product-card--discount');
+  }
+
+  if (!product.isAvailable) {
+    card.classList.add('product-card--out');
+  }
+
+  const media = createElement('div', 'product-card__media');
   const image = createProductImage(product, 'product-card__image', options.sizes || CATALOG_IMAGE_SIZES);
+  media.append(image, createProductBadges(product), createFavoriteButton(product));
 
   const title = createElement('h3', 'product-card__title');
   title.id = titleId;
@@ -116,7 +160,7 @@ function createProductCard(product, options = {}) {
   }
 
   const footer = createElement('div', 'product-card__footer');
-  const price = createElement('p', 'product-card__price', formatPrice(getFinalPrice(product)));
+  const price = createProductPrice(product, 'product-card__price');
 
   const button = createElement('button', 'button button--primary product-card__button', 'В корзину');
   button.type = 'button';
@@ -130,7 +174,7 @@ function createProductCard(product, options = {}) {
   }
 
   footer.append(price, button);
-  card.append(image, title, meta, description, status, footer);
+  card.append(media, title, meta, description, status, footer);
 
   // На главной у карточки есть быстрый заказ через модальное окно
   if (options.quickOrder && product.isAvailable) {

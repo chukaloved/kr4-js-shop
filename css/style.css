@@ -1489,3 +1489,94 @@ summary:focus-visible,
   margin-top: var(--space-sm);
 }
 
+/* ===============================
+   20. Карточка товара: метки, избранное, старая цена
+   =============================== */
+.product-card__media {
+  position: relative;
+}
+
+.product-card__badges {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge {
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.badge--popular {
+  background-color: #73482F;
+}
+
+.badge--discount {
+  background-color: #b00020;
+}
+
+.product-card--out .product-card__image {
+  opacity: 0.55;
+}
+
+.favorite-button {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-size);
+  height: var(--tap-size);
+  padding: 0;
+  border: 1px solid #A69B92;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #A69B92;
+  background-color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+.favorite-button:hover {
+  color: #b00020;
+  border-color: #b00020;
+}
+
+.favorite-button--active {
+  color: #ffffff;
+  border-color: #b00020;
+  background-color: #b00020;
+}
+
+.favorite-button--active:hover {
+  color: #ffffff;
+}
+
+.product-card__price-current {
+  font-weight: 700;
+}
+
+.product-card__price-old {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.favorites-empty {
+  color: var(--color-muted);
+}
+
+.favorites-empty[hidden] {
+  display: none;
+}
+

@@ -253,6 +253,8 @@ document.addEventListener('click', (event) => {
 
   if (addToCart(productId)) {
     showToast(`Товар «${product.title}» добавлен в корзину`);
+    // На странице корзины товар можно добавить из раздела «Избранное»
+    renderCart();
   } else {
     showToast(`Больше ${MAX_QUANTITY} шт. одного товара добавить нельзя`);
   }
