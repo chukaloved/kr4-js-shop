@@ -62,21 +62,7 @@ if (catalogFilters) {
 
 
 // ===============================
-// 3. Предвыбор товара на странице заказа (order.html?product=...)
-// ===============================
-const productSelect = document.getElementById('order-product');
-
-if (productSelect) {
-  const productId = new URLSearchParams(window.location.search).get('product');
-
-  if (productId && productSelect.querySelector(`option[value="${CSS.escape(productId)}"]`)) {
-    productSelect.value = productId;
-  }
-}
-
-
-// ===============================
-// 4. Всплывающие уведомления (вместо alert)
+// 3. Всплывающие уведомления (вместо alert)
 // ===============================
 // Область для уведомлений создаётся сразу при загрузке: так экранные дикторы
 // заранее знают о ней и зачитывают каждое новое сообщение
@@ -98,7 +84,7 @@ function showToast(message) {
 
 
 // ===============================
-// 5. Переключатель темы (выбор сохраняется в localStorage)
+// 4. Переключатель темы (выбор сохраняется в localStorage)
 // ===============================
 const THEME_STORAGE_KEY = 'devicehub-theme';
 const themeToggle = document.querySelector('.theme-toggle');

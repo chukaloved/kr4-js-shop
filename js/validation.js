@@ -3,6 +3,7 @@
 // alert() не используется.
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const namePattern = /^[A-Za-zА-Яа-яЁё\s-]+$/;
 
 // ===============================
 // 1. Вывод и очистка ошибок
@@ -52,6 +53,10 @@ function validateName(field) {
     return 'Введите имя не короче 2 символов.';
   }
 
+  if (!namePattern.test(value)) {
+    return 'Имя может содержать только буквы, пробел и дефис.';
+  }
+
   return '';
 }
 
@@ -91,6 +96,47 @@ function validateSelect(field) {
   return '';
 }
 
+function validateQuantity(field) {
+  const quantity = Number(field.value);
+
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
+    return 'Укажите количество от 1 до 10.';
+  }
+
+  return '';
+}
+
+// Адрес обязателен только при курьерской доставке
+function validateAddress(field) {
+  const delivery = field.form.elements.delivery;
+
+  if (delivery && delivery.value === 'courier' && field.value.trim().length < 5) {
+    return 'Укажите адрес для курьерской доставки.';
+  }
+
+  return '';
+}
+
+// Дата связи необязательна, но не может быть в прошлом
+function validateDate(field) {
+  if (field.value === '') {
+    return '';
+  }
+
+  const today = new Date();
+  const todayText = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, '0'),
+    String(today.getDate()).padStart(2, '0')
+  ].join('-');
+
+  if (field.value < todayText) {
+    return 'Выберите сегодняшнюю или будущую дату.';
+  }
+
+  return '';
+}
+
 function validateCheckbox(field) {
   if (!field.checked) {
     return 'Нужно согласие на обработку персональных данных.';
@@ -113,7 +159,10 @@ const fieldValidators = {
   email: validateEmail,
   phone: validatePhone,
   product: validateSelect,
+  quantity: validateQuantity,
   delivery: validateSelect,
+  address: validateAddress,
+  date: validateDate,
   topic: validateSelect,
   subject: validateSelect,
   message: validateMessage,
@@ -161,7 +210,80 @@ function validateForm(form) {
 
 
 // ===============================
-// 3. Подключение проверки к форме
+// 3. Маска телефона: +7 (900) 000-00-00
+// Маска меняет только вид поля, правильность номера проверяет validatePhone
+// ===============================
+function formatPhone(value) {
+  let digits = value.replace(/\D/g, '');
+
+  if (digits === '') {
+    return value.startsWith('+') ? '+' : '';
+  }
+
+  if (digits[0] === '8') {
+    digits = `7${digits.slice(1)}`;
+  } else if (digits[0] !== '7') {
+    digits = `7${digits}`;
+  }
+
+  digits = digits.slice(0, 11);
+
+  let result = '+7';
+
+  if (digits.length > 1) {
+    result += ` (${digits.slice(1, 4)}`;
+  }
+
+  if (digits.length >= 4) {
+    result += ')';
+  }
+
+  if (digits.length > 4) {
+    result += ` ${digits.slice(4, 7)}`;
+  }
+
+  if (digits.length > 7) {
+    result += `-${digits.slice(7, 9)}`;
+  }
+
+  if (digits.length > 9) {
+    result += `-${digits.slice(9, 11)}`;
+  }
+
+  return result;
+}
+
+function setupPhoneMask(form) {
+  form.querySelectorAll('input[type="tel"]').forEach((input) => {
+    input.addEventListener('input', (event) => {
+      // При удалении символов маску не применяем, иначе нельзя стереть скобку или дефис
+      if (event.inputType && event.inputType.startsWith('delete')) {
+        return;
+      }
+
+      // Курсор в середине строки — не переставляем значение, чтобы курсор не прыгал в конец
+      if (input.selectionStart !== input.value.length) {
+        return;
+      }
+
+      input.value = formatPhone(input.value);
+    });
+  });
+}
+
+
+// ===============================
+// 4. Имитация отправки на сервер
+// ===============================
+function simulateSending() {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 1000);
+  });
+}
+
+
+// ===============================
+// 5. Подключение проверки к форме
 // ===============================
 function getFormMessage(form) {
   let message = form.querySelector('.form-message');
@@ -182,9 +304,15 @@ function setupFormValidation(form, onSuccess) {
 
   const formMessage = getFormMessage(form);
 
-  form.addEventListener('submit', (event) => {
+  setupPhoneMask(form);
+
+  form.addEventListener('submit', async (event) => {
     // Отменяем стандартную отправку: на GitHub Pages нет сервера
     event.preventDefault();
+
+    if (form.getAttribute('aria-busy') === 'true') {
+      return;
+    }
 
     if (!validateForm(form)) {
       const errorsCount = form.querySelectorAll('[aria-invalid="true"]').length;
@@ -193,8 +321,23 @@ function setupFormValidation(form, onSuccess) {
       return;
     }
 
-    formMessage.textContent = '';
+    const submitButton = form.querySelector('[type="submit"]');
+    const buttonText = submitButton.textContent;
+
+    // Пока «идёт отправка», кнопка заблокирована — повторно форму не отправить
+    submitButton.disabled = true;
+    submitButton.textContent = 'Отправка…';
+    form.setAttribute('aria-busy', 'true');
     formMessage.classList.remove('form-message--error');
+    formMessage.textContent = 'Отправляем заявку…';
+
+    await simulateSending();
+
+    submitButton.disabled = false;
+    submitButton.textContent = buttonText;
+    form.removeAttribute('aria-busy');
+    formMessage.textContent = '';
+
     onSuccess(form, formMessage);
   });
 
@@ -209,21 +352,18 @@ function setupFormValidation(form, onSuccess) {
     if (event.target.getAttribute('aria-invalid') === 'true') {
       validateField(event.target);
     }
-  });
 
-  // Заполненное поле проверяется, когда пользователь уходит из него
-  form.addEventListener('focusout', (event) => {
-    const field = event.target;
-
-    if (field.value && field.type !== 'checkbox') {
-      validateField(field);
+    // При смене способа получения заново проверяем адрес
+    const address = form.elements.address;
+    if (event.target.name === 'delivery' && address && address.getAttribute('aria-invalid') === 'true') {
+      validateField(address);
     }
   });
 }
 
 
 // ===============================
-// 4. Формы на страницах заказа и контактов
+// 6. Форма обратной связи (форма заказа подключается в order.js)
 // ===============================
 function showPageSuccess(form, successElement) {
   form.reset();
@@ -232,17 +372,8 @@ function showPageSuccess(form, successElement) {
   successElement.focus();
 }
 
-const orderPageForm = document.querySelector('#order-page-form');
-const orderSuccess = document.querySelector('#order-success');
 const feedbackForm = document.querySelector('#feedback-form');
 const feedbackSuccess = document.querySelector('#feedback-success');
-
-if (orderPageForm && orderSuccess) {
-  setupFormValidation(orderPageForm, (form) => {
-    console.log('Заявка прошла проверку; данные не отправлены на сервер.');
-    showPageSuccess(form, orderSuccess);
-  });
-}
 
 if (feedbackForm && feedbackSuccess) {
   setupFormValidation(feedbackForm, (form) => {
