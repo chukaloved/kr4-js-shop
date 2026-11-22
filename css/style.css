@@ -1185,6 +1185,21 @@ summary:focus-visible,
 /* ===============================
    17. Шапка: корзина и действия
    =============================== */
+/* На узком экране у кнопки меню остаётся только иконка: текст скрыт визуально,
+   но остаётся доступным для экранных дикторов */
+.nav-toggle__text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.js .nav-toggle {
+  padding: var(--space-sm);
+}
+
 .site-header__actions {
   display: flex;
   align-items: center;
@@ -1327,6 +1342,7 @@ summary:focus-visible,
 
 .cart-content {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-lg);
 }
 
@@ -1340,11 +1356,11 @@ summary:focus-visible,
 
 .cart-item {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr) auto;
   grid-template-areas:
-    "image info"
-    "quantity total"
-    "remove remove";
+    "image info info"
+    "quantity quantity total"
+    "remove remove remove";
   align-items: center;
   gap: var(--space-sm) var(--space-md);
   padding: var(--space-md);
