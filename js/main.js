@@ -1,6 +1,5 @@
 console.log('Файл main.js подключён');
-console.log(product);
-console.table(product);
+console.table(products);
 
 
 // ===============================
@@ -34,20 +33,121 @@ function createProductSummary(product) {
   return `${product.title}: ${formatPrice(finalPrice)}. Статус: ${status}.`;
 }
 
-const discountValue = calculateDiscount(product.price, product.discountPercent);
-const finalPrice = calculateFinalPrice(product.price, product.discountPercent);
-const productSummary = createProductSummary(product);
 
-console.log(formatPrice(product.price));
-console.log('Скидка:', formatPrice(discountValue));
-console.log('Цена со скидкой:', formatPrice(finalPrice));
-console.log(getProductStatus(product));
-console.log(productSummary);
+// ===============================
+// 0.1. Работа с массивом товаров
+// ===============================
+console.log('Количество товаров:', products.length);
 
-const isExpensive = product.price > 10000;
-const canBuyWithDiscount = product.isAvailable && product.discountPercent > 0;
-console.log('Дороже 10 000 ₽:', isExpensive);
-console.log('Можно купить со скидкой:', canBuyWithDiscount);
+for (let i = 0; i < products.length; i++) {
+  console.log(`${i + 1}. ${products[i].title}`);
+}
+
+for (const item of products) {
+  if (item.discountPercent > 0) {
+    console.log(`Скидка ${item.discountPercent}%: ${item.title}`);
+  } else if (!item.isAvailable) {
+    console.log(`Нет в наличии: ${item.title}`);
+  }
+}
+
+products.forEach((item) => {
+  console.log(createProductSummary(item));
+});
+
+function getProductTitles(products) {
+  return products.map((product) => product.title);
+}
+
+function getAvailableProducts(products) {
+  return products.filter((product) => product.isAvailable);
+}
+
+console.log('Названия товаров:', getProductTitles(products));
+console.log('Товары в наличии:', getAvailableProducts(products));
+
+function searchProducts(products, query) {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (normalizedQuery === '') {
+    return products;
+  }
+
+  return products.filter((product) => {
+    return product.title.toLowerCase().includes(normalizedQuery);
+  });
+}
+
+function filterProductsByCategory(products, category) {
+  if (category === 'all') {
+    return products;
+  }
+
+  return products.filter((product) => product.category === category);
+}
+
+// sort() меняет массив, поэтому сортируем копию, а исходный порядок сохраняется
+function sortProductsByPrice(products, direction = 'asc') {
+  const productsCopy = [...products];
+
+  if (direction === 'desc') {
+    return productsCopy.sort((a, b) => b.price - a.price);
+  }
+
+  return productsCopy.sort((a, b) => a.price - b.price);
+}
+
+function findProductById(products, id) {
+  return products.find((product) => product.id === id);
+}
+
+function getPreparedProducts(products, query, category, sortDirection) {
+  let result = searchProducts(products, query);
+  result = filterProductsByCategory(result, category);
+  result = sortProductsByPrice(result, sortDirection);
+  return result;
+}
+
+console.log('Поиск «logitech»:', getProductTitles(searchProducts(products, 'logitech')));
+console.log('Категория «Клавиатуры»:', getProductTitles(filterProductsByCategory(products, 'keyboard')));
+console.log('Сначала дешевле:', getProductTitles(sortProductsByPrice(products, 'asc')));
+console.log('Сначала дороже:', getProductTitles(sortProductsByPrice(products, 'desc')));
+console.log('Товар с id 9:', findProductById(products, 9));
+console.log('Товар с id 99:', findProductById(products, 99));
+console.log('Первый товар после сортировки не изменил исходный массив:', products[0].title);
+console.log(
+  'Микрофоны со словом «fifine» по убыванию цены:',
+  getProductTitles(getPreparedProducts(products, 'fifine', 'microphone', 'desc'))
+);
+
+function calculateTotalPrice(products) {
+  return products.reduce((total, product) => total + product.price, 0);
+}
+
+function countAvailableProducts(products) {
+  let count = 0;
+
+  for (const product of products) {
+    if (product.isAvailable) {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+function calculateAveragePrice(products) {
+  if (products.length === 0) {
+    return 0;
+  }
+
+  return Math.round(calculateTotalPrice(products) / products.length);
+}
+
+console.log('Общая стоимость:', formatPrice(calculateTotalPrice(products)));
+console.log('В наличии:', countAvailableProducts(products));
+console.log('Средняя цена:', formatPrice(calculateAveragePrice(products)));
+console.log('Средняя цена пустого массива:', calculateAveragePrice([]));
 
 const messageElement = document.querySelector('.js-message');
 const productOutputElement = document.querySelector('.product-output');
@@ -56,10 +156,20 @@ if (messageElement) {
   messageElement.textContent = 'JavaScript подключён корректно.';
 }
 
-// textContent выводит строку как обычный текст, а не как HTML-разметку
 if (productOutputElement) {
-  productOutputElement.textContent = productSummary;
+  const cheapest = sortProductsByPrice(products, 'asc')[0];
+  const statsLines = [
+    `Всего товаров: ${products.length}`,
+    `В наличии: ${countAvailableProducts(products)}`,
+    `Общая стоимость каталога: ${formatPrice(calculateTotalPrice(products))}`,
+    `Средняя цена: ${formatPrice(calculateAveragePrice(products))}`,
+    `Самый доступный товар: ${cheapest.title} — ${formatPrice(cheapest.price)}`
+  ];
+
+  productOutputElement.textContent = statsLines.join('\n');
 }
+
+
 
 const desktopQuery = window.matchMedia('(min-width: 1024px)');
 
