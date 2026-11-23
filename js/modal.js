@@ -19,7 +19,6 @@ function openOrderDialog(button) {
 }
 
 if (orderDialog && dialogForm) {
-  // Кнопки «Заказать» создаются JavaScript, поэтому слушаем клик на документе
   document.addEventListener('click', (event) => {
     const button = event.target.closest('[data-action="order"]');
 
@@ -32,7 +31,6 @@ if (orderDialog && dialogForm) {
     button.addEventListener('click', () => orderDialog.close());
   });
 
-  // Клик по затемнённому фону закрывает окно
   orderDialog.addEventListener('click', (event) => {
     if (event.target !== orderDialog) {
       return;
@@ -48,7 +46,6 @@ if (orderDialog && dialogForm) {
     }
   });
 
-  // Esc закрывает <dialog> сам; после закрытия возвращаем фокус на кнопку «Заказать»
   orderDialog.addEventListener('close', () => {
     if (lastDialogTrigger) {
       lastDialogTrigger.focus();

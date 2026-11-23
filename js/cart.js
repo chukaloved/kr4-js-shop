@@ -1,13 +1,10 @@
 // Корзина: добавление и удаление товаров, изменение количества, расчёт суммы.
 // В корзине хранятся только id товара и количество: [{ id: 1, quantity: 2 }].
-// Название и цена всегда берутся из массива products, поэтому в localStorage
-// нельзя «подменить» цену товара.
+
 
 const CART_STORAGE_KEY = 'devicehub-cart';
 const PROMO_STORAGE_KEY = 'devicehub-promo';
 const MAX_QUANTITY = 10;
-
-// Промокоды: процентная скидка или фиксированная сумма с минимальным заказом
 const promoCodes = {
   DEVICE10: { type: 'percent', value: 10, minTotal: 0, label: 'скидка 10%' },
   STUDENT500: { type: 'fixed', value: 500, minTotal: 5000, label: 'скидка 500 ₽ на заказ от 5 000 ₽' }
@@ -35,7 +32,6 @@ function loadCart() {
     return [];
   }
 
-  // Отбрасываем испорченные записи и товары, которых больше нет в каталоге
   return savedCart.filter(isValidCartItem);
 }
 
@@ -106,8 +102,6 @@ function clearCart() {
 function getCartItemsCount() {
   return cart.reduce((count, item) => count + item.quantity, 0);
 }
-
-// Соединяем записи корзины с данными товаров
 function getCartDetails() {
   return cart.map((item) => {
     const product = findProductById(products, item.id);
@@ -169,8 +163,6 @@ function calculatePromoDiscount(subtotal, code) {
 
   return Math.min(promo.value, subtotal);
 }
-
-// Все суммы корзины в одном объекте: используется в корзине и на странице заказа
 function getCartTotals() {
   const cartDetails = getCartDetails();
   const subtotal = calculateCartTotal(cartDetails);
@@ -222,8 +214,6 @@ function updateCartCounter() {
 }
 
 updateCartCounter();
-
-// Если корзину изменили в другой вкладке, обновляем счётчик и страницу корзины
 window.addEventListener('storage', (event) => {
   if (event.key === CART_STORAGE_KEY) {
     cart = loadCart();
@@ -253,7 +243,6 @@ document.addEventListener('click', (event) => {
 
   if (addToCart(productId)) {
     showToast(`Товар «${product.title}» добавлен в корзину`);
-    // На странице корзины товар можно добавить из раздела «Избранное»
     renderCart();
   } else {
     showToast(`Больше ${MAX_QUANTITY} шт. одного товара добавить нельзя`);
@@ -349,7 +338,6 @@ function renderCart() {
 
   promoRemoveButton.hidden = !totals.promoCode;
 
-  // Состояние активного промокода показываем при каждой перерисовке
   if (totals.promoCode) {
     showPromoMessage(
       totals.promoWarning || `Промокод ${totals.promoCode} применён: ${promoCodes[totals.promoCode].label}.`,

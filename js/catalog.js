@@ -31,8 +31,6 @@ function filterProductsByCategory(products, category) {
 
   return products.filter((product) => product.category === category);
 }
-
-// sort() меняет массив, поэтому сортируем копию, а исходный порядок сохраняется
 function sortProducts(products, sortType) {
   const productsCopy = [...products];
 
@@ -117,8 +115,6 @@ function createProductPrice(product, className) {
   const price = createElement('p', className);
   const current = createElement('span', `${className}-current`, formatPrice(getFinalPrice(product)));
   price.append(current);
-
-  // Старая цена показывается, только если есть скидка
   if (product.discountPercent > 0) {
     const old = createElement('s', `${className}-old`, formatPrice(product.price));
     old.setAttribute('aria-label', `Старая цена ${formatPrice(product.price)}`);
@@ -180,8 +176,6 @@ function createProductCard(product, options = {}) {
 
   footer.append(price, button);
   card.append(media, title, meta, description, status, footer);
-
-  // На главной у карточки есть быстрый заказ через модальное окно
   if (options.quickOrder && product.isAvailable) {
     const quickOrderButton = createElement('button', 'button button--secondary product-card__quick', 'Купить в 1 клик');
     quickOrderButton.type = 'button';
@@ -211,7 +205,7 @@ function renderProducts(container, productsToRender, options) {
 const productsContainer = document.querySelector('[data-products-container]');
 const popularContainer = document.querySelector('[data-popular-container]');
 
-// На главной выводятся только популярные товары
+
 if (popularContainer) {
   const popularProducts = products.filter((product) => product.isPopular);
   renderProducts(popularContainer, popularProducts, {
@@ -232,7 +226,6 @@ const defaultCatalogState = {
   onlyAvailable: false
 };
 
-// Копия объекта: при сбросе фильтров возвращаемся к значениям по умолчанию
 const catalogState = { ...defaultCatalogState };
 
 const catalogControls = document.querySelector('#catalog-controls');
@@ -249,7 +242,6 @@ function isCatalogFiltered() {
   return Object.keys(defaultCatalogState).some((key) => catalogState[key] !== defaultCatalogState[key]);
 }
 
-// Пояснение в пустом состоянии: что именно мешает найти товары
 function getEmptyHint() {
   const reasons = [];
 
@@ -268,7 +260,6 @@ function getEmptyHint() {
   return reasons.length > 0 ? `Условия поиска: ${reasons.join(', ')}. Попробуйте изменить их или поищите:` : '';
 }
 
-// Подсказки — бренды самых высоко оценённых товаров
 function renderEmptySuggestions() {
   const brands = sortProducts(products, 'rating-desc').map((product) => product.title.split(' ')[1]);
   const uniqueBrands = [...new Set(brands)].slice(0, 4);
@@ -303,8 +294,6 @@ function updateCatalog() {
     button.disabled = !isCatalogFiltered();
   });
 }
-
-// Переносим состояние обратно в элементы управления (после сброса или подсказки)
 function syncCatalogControls() {
   searchInput.value = catalogState.query;
   categoryFilter.value = catalogState.category;
@@ -321,7 +310,6 @@ function resetCatalog() {
 
 if (productsContainer) {
   if (catalogControls) {
-    // Enter в поле поиска не должен перезагружать страницу
     catalogControls.addEventListener('submit', (event) => {
       event.preventDefault();
     });
@@ -354,8 +342,6 @@ if (productsContainer) {
       updateCatalog();
     });
   }
-
-  // Кнопки «Сбросить фильтры» и подсказки в пустом состоянии
   document.addEventListener('click', (event) => {
     const button = event.target.closest('[data-action="reset-filters"], [data-action="suggest"]');
 

@@ -54,8 +54,6 @@ function createProductDetails(product, isSinglePage) {
   media.append(image, createFavoriteButton(product));
 
   const content = createElement('div', 'product-details__content');
-
-  // На странице одного товара название — главный заголовок страницы
   const title = createElement(isSinglePage ? 'h1' : 'h2', 'product-details__title', product.title);
   title.id = titleId;
 
@@ -157,8 +155,6 @@ function renderProductPage() {
   const idParam = params.get('id');
 
   productDetailsContainer.textContent = '';
-
-  // Без параметра id показываем подробное описание всех товаров
   if (idParam === null) {
     products.forEach((product) => {
       productDetailsContainer.append(createProductDetails(product, false));

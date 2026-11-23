@@ -14,7 +14,6 @@ function calculateFinalPrice(price, discountPercent) {
   return price - discountValue;
 }
 
-// Цена, по которой товар продаётся сейчас (с учётом скидки)
 function getFinalPrice(product) {
   return calculateFinalPrice(product.price, product.discountPercent);
 }
@@ -35,8 +34,6 @@ function findProductById(products, id) {
   return products.find((product) => product.id === id);
 }
 
-// Короткий помощник: создаёт элемент с классом и текстом.
-// Текст всегда выводится через textContent, а не через innerHTML.
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
 
@@ -51,7 +48,7 @@ function createElement(tagName, className, text) {
   return element;
 }
 
-// Изображение товара с адаптивными размерами (srcset / sizes)
+
 function createProductImage(product, className, sizes) {
   const image = document.createElement('img');
   const widths = [480, 640, 960];

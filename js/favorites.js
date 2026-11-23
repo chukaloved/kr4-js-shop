@@ -29,7 +29,6 @@ function toggleFavorite(productId) {
   return isFavorite(productId);
 }
 
-// Кнопка-сердечко: aria-pressed сообщает экранному диктору, включена ли она
 function createFavoriteButton(product) {
   const button = createElement('button', 'favorite-button');
   button.type = 'button';
@@ -74,8 +73,6 @@ function renderFavorites() {
   favoritesCount.textContent = String(favoriteProducts.length);
 }
 
-// Один обработчик на весь документ: сердечки есть в каталоге, на главной,
-// на странице товара и в избранном
 document.addEventListener('click', (event) => {
   const button = event.target.closest('[data-action="toggle-favorite"]');
 
@@ -91,8 +88,6 @@ document.addEventListener('click', (event) => {
   }
 
   const active = toggleFavorite(productId);
-
-  // Обновляем все сердечки этого товара на странице
   document.querySelectorAll(`[data-action="toggle-favorite"][data-product-id="${productId}"]`).forEach((item) => {
     updateFavoriteButton(item, product);
   });
@@ -101,7 +96,4 @@ document.addEventListener('click', (event) => {
   renderFavorites();
 });
 
-// renderProducts объявлена в catalog.js, который подключается после этого файла.
-// Скрипты с defer выполняются до события DOMContentLoaded, поэтому к этому моменту
-// все функции уже доступны.
 document.addEventListener('DOMContentLoaded', renderFavorites);

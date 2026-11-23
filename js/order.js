@@ -11,7 +11,6 @@ const orderCartList = document.querySelector('[data-order-cart-list]');
 const orderCartTotal = document.querySelector('[data-order-cart-total]');
 const singleProductFields = document.querySelectorAll('[data-single-product]');
 
-// Варианты списка создаются из массива: новый товар в data.js сразу появится в форме
 function fillProductSelect() {
   getAvailableOrderProducts().forEach((product) => {
     const option = createElement('option', '', `${product.title} — ${formatPrice(getFinalPrice(product))}`);
@@ -33,7 +32,6 @@ function preselectProduct() {
   }
 }
 
-// Если в корзине есть товары, заказываем их; поля «Товар» и «Количество» не нужны
 function renderOrderCart() {
   const totals = getCartTotals();
   const hasCartItems = totals.itemsCount > 0;
@@ -44,7 +42,6 @@ function renderOrderCart() {
     field.hidden = hasCartItems;
   });
 
-  // Отключённые поля не проверяются и не отправляются
   orderProductSelect.disabled = hasCartItems;
   orderQuantityInput.disabled = hasCartItems;
 
@@ -91,7 +88,6 @@ if (orderPageForm && orderSuccess) {
     console.log('Заявка прошла проверку; данные не отправлены на сервер:', summary);
     orderSuccessText.textContent = `Заказ: ${summary}. Мы свяжемся с вами для подтверждения.`;
 
-    // Заказ из корзины оформлен — корзину и промокод очищаем
     if (getCartItemsCount() > 0) {
       clearCart();
       removePromoCode();

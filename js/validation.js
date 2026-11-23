@@ -106,7 +106,6 @@ function validateQuantity(field) {
   return '';
 }
 
-// Адрес обязателен только при курьерской доставке
 function validateAddress(field) {
   const delivery = field.form.elements.delivery;
 
@@ -117,7 +116,6 @@ function validateAddress(field) {
   return '';
 }
 
-// Дата связи необязательна, но не может быть в прошлом
 function validateDate(field) {
   if (field.value === '') {
     return '';
@@ -153,7 +151,6 @@ function validateMessage(field) {
   return '';
 }
 
-// Для каждого имени поля — своя функция проверки
 const fieldValidators = {
   name: validateName,
   email: validateEmail,
@@ -169,7 +166,6 @@ const fieldValidators = {
   agreement: validateCheckbox
 };
 
-// Возвращает true, если поле заполнено правильно
 function validateField(field) {
   const validator = fieldValidators[field.name];
 
@@ -256,12 +252,9 @@ function formatPhone(value) {
 function setupPhoneMask(form) {
   form.querySelectorAll('input[type="tel"]').forEach((input) => {
     input.addEventListener('input', (event) => {
-      // При удалении символов маску не применяем, иначе нельзя стереть скобку или дефис
       if (event.inputType && event.inputType.startsWith('delete')) {
         return;
       }
-
-      // Курсор в середине строки — не переставляем значение, чтобы курсор не прыгал в конец
       if (input.selectionStart !== input.value.length) {
         return;
       }
@@ -307,7 +300,6 @@ function setupFormValidation(form, onSuccess) {
   setupPhoneMask(form);
 
   form.addEventListener('submit', async (event) => {
-    // Отменяем стандартную отправку: на GitHub Pages нет сервера
     event.preventDefault();
 
     if (form.getAttribute('aria-busy') === 'true') {
@@ -323,8 +315,6 @@ function setupFormValidation(form, onSuccess) {
 
     const submitButton = form.querySelector('[type="submit"]');
     const buttonText = submitButton.textContent;
-
-    // Пока «идёт отправка», кнопка заблокирована — повторно форму не отправить
     submitButton.disabled = true;
     submitButton.textContent = 'Отправка…';
     form.setAttribute('aria-busy', 'true');
@@ -340,8 +330,6 @@ function setupFormValidation(form, onSuccess) {
 
     onSuccess(form, formMessage);
   });
-
-  // Поле с ошибкой проверяется заново при вводе — ошибка исчезает сразу после исправления
   form.addEventListener('input', (event) => {
     if (event.target.getAttribute('aria-invalid') === 'true') {
       validateField(event.target);
@@ -352,8 +340,6 @@ function setupFormValidation(form, onSuccess) {
     if (event.target.getAttribute('aria-invalid') === 'true') {
       validateField(event.target);
     }
-
-    // При смене способа получения заново проверяем адрес
     const address = form.elements.address;
     if (event.target.name === 'delivery' && address && address.getAttribute('aria-invalid') === 'true') {
       validateField(address);
